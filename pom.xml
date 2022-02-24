@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.3</version>
+        <version>2.5.9</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.safetynetalerts</groupId>
@@ -18,6 +18,10 @@
     <properties>
         <java.version>1.8</java.version>
         <hal.version>3.3.9.RELEASE</hal.version>
+        <mavenSite.version>3.10.0</mavenSite.version>
+        <jacoco.version>0.8.7</jacoco.version>
+        <surefire.version>2.22.2</surefire.version>
+        <jUnitPlatformSurefireProvider.version>1.2.0</jUnitPlatformSurefireProvider.version>
     </properties>
 
     <dependencies>
@@ -49,6 +53,12 @@
             <artifactId>spring-data-rest-hal-browser</artifactId>
             <version>${hal.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco.version}</version>
+            <type>maven-plugin</type>
+        </dependency>
     </dependencies>
 
     <build>
@@ -58,7 +68,75 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${parent.version}</version>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>${mavenSite.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.junit.platform</groupId>
+                        <artifactId>junit-platform-surefire-provider</artifactId>
+                        <version>${jUnitPlatformSurefireProvider.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <excludes>
+                                <exclude>none</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>${surefire.version}</version>
+            </plugin>
+        </plugins>
+    </reporting>
 
 </project>
