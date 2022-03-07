@@ -18,7 +18,7 @@
     <properties>
         <java.version>1.8</java.version>
         <hal.version>3.3.9.RELEASE</hal.version>
-        <mavenSite.version>3.10.0</mavenSite.version>
+        <mavenSite.version>3.11.0</mavenSite.version>
         <jacoco.version>0.8.7</jacoco.version>
         <surefire.version>2.22.2</surefire.version>
         <jUnitPlatformSurefireProvider.version>1.2.0</jUnitPlatformSurefireProvider.version>
@@ -30,13 +30,13 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <scope>runtime</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -58,6 +58,16 @@
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>${jacoco.version}</version>
             <type>maven-plugin</type>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.9.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
