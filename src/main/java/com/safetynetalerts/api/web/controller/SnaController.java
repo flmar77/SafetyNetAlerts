@@ -1,5 +1,6 @@
 package com.safetynetalerts.api.web.controller;
 
+import com.safetynetalerts.api.domain.model.AlertedChildrenAndAdults;
 import com.safetynetalerts.api.domain.model.CoveredPersonsAndStats;
 import com.safetynetalerts.api.domain.service.SnaService;
 import org.slf4j.Logger;
@@ -17,15 +18,18 @@ public class SnaController {
     @Autowired
     private SnaService snaService;
 
-    @GetMapping("/hello")
-    public String hello() {
-        return "Hello User!";
-    }
-
     @GetMapping("/firestation")
     public CoveredPersonsAndStats getCoveredPersonsAndStatsByFireStation(@RequestParam int stationNumber) {
         LOGGER.info("request to get Covered Persons And Stats By FireStation : " + stationNumber);
         return snaService.getCoveredPersonsAndStatsByFireStation(stationNumber);
-        //TODO : add wrong cases
+        //TODO : add wrong cases and log ?
     }
+
+    @GetMapping("/childAlert")
+    public AlertedChildrenAndAdults getAlertedChildrenAndAdultsByAddress(@RequestParam String address) {
+        LOGGER.info("request to get Alerted Children And Adults By Address : " + address);
+        return snaService.getAlertedChildrenAndAdultsByAddress(address);
+        //TODO : add wrong cases and log ?
+    }
+
 }

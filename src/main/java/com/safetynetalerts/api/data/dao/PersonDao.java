@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface PersonDao extends CrudRepository<Person, Long> {
     List<Person> findAllByFireStation(int fireStation);
+
+    List<Person> findAllByAddress(String Address);
 }
