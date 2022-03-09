@@ -1,6 +1,6 @@
 package com.safetynetalerts.api;
 
-import com.safetynetalerts.api.data.inputservice.InputService;
+import com.safetynetalerts.api.data.input.service.InputService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

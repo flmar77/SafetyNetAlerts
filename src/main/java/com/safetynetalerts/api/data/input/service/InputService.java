@@ -1,14 +1,14 @@
-package com.safetynetalerts.api.data.inputservice;
+package com.safetynetalerts.api.data.input.service;
 
 import com.google.gson.Gson;
 import com.safetynetalerts.api.data.dao.FireStationDao;
 import com.safetynetalerts.api.data.dao.PersonDao;
 import com.safetynetalerts.api.data.entity.FireStation;
 import com.safetynetalerts.api.data.entity.Person;
-import com.safetynetalerts.api.data.inputmodel.AggregatedInputModel;
-import com.safetynetalerts.api.data.inputmodel.FireStationInputModel;
-import com.safetynetalerts.api.data.inputmodel.MedicalRecordInputModel;
-import com.safetynetalerts.api.data.inputmodel.PersonInputModel;
+import com.safetynetalerts.api.data.input.model.AggregatedInputModel;
+import com.safetynetalerts.api.data.input.model.FireStationInputModel;
+import com.safetynetalerts.api.data.input.model.MedicalRecordInputModel;
+import com.safetynetalerts.api.data.input.model.PersonInputModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +18,8 @@ import java.io.FileReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class InputService {
@@ -32,18 +34,26 @@ public class InputService {
 
         AggregatedInputModel aggregatedInputModel = new Gson().fromJson(bufferedReader, AggregatedInputModel.class);
 
-        ArrayList<Person> personEntities = convertPersonFromInputModelToEntity(aggregatedInputModel.getPersonInputModels(), aggregatedInputModel.getMedicalRecordInputModels());
-        personDao.saveAll(personEntities);
+        // TODO : don't use raw List
+        List entities = convertFromInputModelToEntity(aggregatedInputModel);
 
-        ArrayList<FireStation> fireStationEntities = convertFireStationFromInputModelToEntity(aggregatedInputModel.getFireStationInputModels());
-        fireStationDao.saveAll(fireStationEntities);
+        personDao.saveAll((ArrayList<Person>) entities.get(0));
+        fireStationDao.saveAll((ArrayList<FireStation>) entities.get(1));
     }
 
-    private ArrayList<Person> convertPersonFromInputModelToEntity(ArrayList<PersonInputModel> personInputModels, ArrayList<MedicalRecordInputModel> medicalRecordInputModels) {
+    private List convertFromInputModelToEntity(AggregatedInputModel aggregatedInputModel) {
 
         ArrayList<Person> personEntities = new ArrayList<>();
+        ArrayList<FireStation> fireStationEntities = new ArrayList<>();
 
-        for (PersonInputModel personInputModel : personInputModels) {
+        for (FireStationInputModel fireStationInputModel : aggregatedInputModel.getFireStationInputModels()) {
+            FireStation fireStation = new FireStation();
+            fireStation.setAddress(fireStationInputModel.getAddress());
+            fireStation.setStation(fireStationInputModel.getStation());
+            fireStationEntities.add(fireStation);
+        }
+
+        for (PersonInputModel personInputModel : aggregatedInputModel.getPersonInputModels()) {
 
             Person person = new Person();
             person.setFirstName(personInputModel.getFirstName());
@@ -54,7 +64,7 @@ public class InputService {
             person.setPhone(personInputModel.getPhone());
             person.setEmail(personInputModel.getEmail());
 
-            for (MedicalRecordInputModel medicalRecordInputModel : medicalRecordInputModels) {
+            for (MedicalRecordInputModel medicalRecordInputModel : aggregatedInputModel.getMedicalRecordInputModels()) {
                 if (personInputModel.getFirstName().equals(medicalRecordInputModel.getFirstName())
                         && personInputModel.getLastName().equals(medicalRecordInputModel.getLastName())) {
                     person.setBirthdate(LocalDate.parse(medicalRecordInputModel.getBirthdate(), DateTimeFormatter.ofPattern("MM/dd/yyyy")));
@@ -63,21 +73,16 @@ public class InputService {
                     break;
                 }
             }
+
+            for (FireStationInputModel fireStationInputModel : aggregatedInputModel.getFireStationInputModels()) {
+                if (personInputModel.getAddress().equals(fireStationInputModel.getAddress())) {
+                    person.setFireStation(fireStationInputModel.getStation());
+                    break;
+                }
+            }
+
             personEntities.add(person);
         }
-        return personEntities;
-    }
-
-    private ArrayList<FireStation> convertFireStationFromInputModelToEntity(ArrayList<FireStationInputModel> fireStationInputModels) {
-
-        ArrayList<FireStation> fireStationEntities = new ArrayList<>();
-
-        for (FireStationInputModel fireStationInputModel : fireStationInputModels) {
-            FireStation fireStation = new FireStation();
-            fireStation.setAddress(fireStationInputModel.getAddress());
-            fireStation.setStation(fireStationInputModel.getStation());
-            fireStationEntities.add(fireStation);
-        }
-        return fireStationEntities;
+        return Arrays.asList(personEntities, fireStationEntities);
     }
 }

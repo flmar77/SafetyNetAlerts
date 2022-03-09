@@ -1,4 +1,4 @@
-package com.safetynetalerts.api.data.inputmodel;
+package com.safetynetalerts.api.data.input.model;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;

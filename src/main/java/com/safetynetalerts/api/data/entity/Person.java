@@ -20,6 +20,7 @@ public class Person {
     private String firstName;
     private String lastName;
     private String address;
+    private int fireStation;
     private String city;
     private String zip;
     private String phone;
