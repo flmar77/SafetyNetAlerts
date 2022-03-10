@@ -3,8 +3,9 @@ package com.safetynetalerts.api.domain.model;
 import lombok.Data;
 
 @Data
-public class AlertedPerson {
+public class FireStationPersonModel {
     private String firstName;
     private String lastName;
-    private int age;
+    private String address;
+    private String phone;
 }

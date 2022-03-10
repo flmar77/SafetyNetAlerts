@@ -2,10 +2,7 @@ package com.safetynetalerts.api.domain.service;
 
 import com.safetynetalerts.api.data.dao.PersonDao;
 import com.safetynetalerts.api.data.entity.Person;
-import com.safetynetalerts.api.domain.model.AlertedChildrenAndAdults;
-import com.safetynetalerts.api.domain.model.AlertedPerson;
-import com.safetynetalerts.api.domain.model.CoveredPerson;
-import com.safetynetalerts.api.domain.model.CoveredPersonsAndStats;
+import com.safetynetalerts.api.domain.model.*;
 import com.safetynetalerts.api.helper.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +11,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SnaService {
@@ -23,58 +21,74 @@ public class SnaService {
     @Autowired
     private DateHelper dateHelper;
 
-    public CoveredPersonsAndStats getCoveredPersonsAndStatsByFireStation(int stationNumber) {
-        CoveredPersonsAndStats coveredPersonsAndStats = new CoveredPersonsAndStats();
-        coveredPersonsAndStats.setCoveredPersons(new ArrayList<>());
-        coveredPersonsAndStats.setAdultCounter(0);
-        coveredPersonsAndStats.setChildCounter(0);
+    public FireStationModel getFireStationModel(int stationNumber) {
+        FireStationModel firestationModel = new FireStationModel();
+        firestationModel.setFireStationPersonModels(new ArrayList<>());
+        firestationModel.setAdultCounter(0);
+        firestationModel.setChildCounter(0);
         LocalDate localDateNow = dateHelper.now();
 
         List<Person> personsByFireStation = personDao.findAllByFireStation(stationNumber);
 
-        List<CoveredPerson> coveredPersons = new ArrayList<>();
+        List<FireStationPersonModel> fireStationPersonModels = new ArrayList<>();
         for (Person personByFireStation : personsByFireStation) {
-            CoveredPerson coveredPerson = new CoveredPerson();
-            coveredPerson.setFirstName(personByFireStation.getFirstName());
-            coveredPerson.setLastName(personByFireStation.getLastName());
-            coveredPerson.setAddress(personByFireStation.getAddress());
-            coveredPerson.setPhone(personByFireStation.getPhone());
-            coveredPersons.add(coveredPerson);
+            FireStationPersonModel fireStationPersonModel = new FireStationPersonModel();
+            fireStationPersonModel.setFirstName(personByFireStation.getFirstName());
+            fireStationPersonModel.setLastName(personByFireStation.getLastName());
+            fireStationPersonModel.setAddress(personByFireStation.getAddress());
+            fireStationPersonModel.setPhone(personByFireStation.getPhone());
+            fireStationPersonModels.add(fireStationPersonModel);
             if (Period.between(personByFireStation.getBirthdate(), localDateNow).getYears() <= 18) {
-                coveredPersonsAndStats.setChildCounter(coveredPersonsAndStats.getChildCounter() + 1);
+                firestationModel.setChildCounter(firestationModel.getChildCounter() + 1);
             } else {
-                coveredPersonsAndStats.setAdultCounter(coveredPersonsAndStats.getAdultCounter() + 1);
+                firestationModel.setAdultCounter(firestationModel.getAdultCounter() + 1);
             }
         }
-        coveredPersonsAndStats.setCoveredPersons(coveredPersons);
+        firestationModel.setFireStationPersonModels(fireStationPersonModels);
 
-        return coveredPersonsAndStats;
+        return firestationModel;
     }
 
-    public AlertedChildrenAndAdults getAlertedChildrenAndAdultsByAddress(String address) {
-        AlertedChildrenAndAdults alertedChildrenAndAdults = new AlertedChildrenAndAdults();
-        alertedChildrenAndAdults.setAlertedChildren(new ArrayList<>());
-        alertedChildrenAndAdults.setAlertedAdults(new ArrayList<>());
+    public ChildAlertModel getChildAlertModel(String address) {
+        ChildAlertModel childAlertModel = new ChildAlertModel();
+        childAlertModel.setAlertedChildren(new ArrayList<>());
+        childAlertModel.setAlertedAdults(new ArrayList<>());
         LocalDate localDateNow = dateHelper.now();
 
         List<Person> personsByAddress = personDao.findAllByAddress(address);
 
-        List<AlertedPerson> alertedChildrenList = new ArrayList<>();
-        List<AlertedPerson> alertedAdultsList = new ArrayList<>();
+        List<ChildAlertPersonModel> alertedChildrenList = new ArrayList<>();
+        List<ChildAlertPersonModel> alertedAdultsList = new ArrayList<>();
         for (Person personByAddress : personsByAddress) {
-            AlertedPerson alertedPerson = new AlertedPerson();
-            alertedPerson.setFirstName(personByAddress.getFirstName());
-            alertedPerson.setLastName(personByAddress.getLastName());
-            alertedPerson.setAge(Period.between(personByAddress.getBirthdate(), localDateNow).getYears());
-            if (alertedPerson.getAge() <= 18) {
-                alertedChildrenList.add(alertedPerson);
+            ChildAlertPersonModel childAlertPersonModel = new ChildAlertPersonModel();
+            childAlertPersonModel.setFirstName(personByAddress.getFirstName());
+            childAlertPersonModel.setLastName(personByAddress.getLastName());
+            childAlertPersonModel.setAge(Period.between(personByAddress.getBirthdate(), localDateNow).getYears());
+            if (childAlertPersonModel.getAge() <= 18) {
+                alertedChildrenList.add(childAlertPersonModel);
             } else {
-                alertedAdultsList.add(alertedPerson);
+                alertedAdultsList.add(childAlertPersonModel);
             }
         }
-        alertedChildrenAndAdults.setAlertedChildren(alertedChildrenList);
-        alertedChildrenAndAdults.setAlertedAdults(alertedAdultsList);
+        childAlertModel.setAlertedChildren(alertedChildrenList);
+        childAlertModel.setAlertedAdults(alertedAdultsList);
 
-        return alertedChildrenAndAdults;
+        return childAlertModel;
+    }
+
+    public PhoneAlertModel getPhoneAlertModel(int firestation_number) {
+        PhoneAlertModel phoneAlertModel = new PhoneAlertModel();
+        phoneAlertModel.setPhones(new ArrayList<>());
+
+        List<Person> personsByFireStation = personDao.findAllByFireStation(firestation_number);
+
+        List<String> rawPhones = new ArrayList<>();
+        for (Person personByFireStation : personsByFireStation) {
+            rawPhones.add(personByFireStation.getPhone());
+        }
+        List<String> phones = rawPhones.stream().distinct().collect(Collectors.toList());
+        phoneAlertModel.setPhones(phones);
+
+        return phoneAlertModel;
     }
 }

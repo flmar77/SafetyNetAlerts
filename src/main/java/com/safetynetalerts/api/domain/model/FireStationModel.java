@@ -5,8 +5,8 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class CoveredPersonsAndStats {
-    private List<CoveredPerson> coveredPersons;
+public class FireStationModel {
+    private List<FireStationPersonModel> fireStationPersonModels;
     private int adultCounter;
     private int childCounter;
 }

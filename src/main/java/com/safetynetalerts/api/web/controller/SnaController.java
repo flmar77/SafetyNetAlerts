@@ -1,7 +1,8 @@
 package com.safetynetalerts.api.web.controller;
 
-import com.safetynetalerts.api.domain.model.AlertedChildrenAndAdults;
-import com.safetynetalerts.api.domain.model.CoveredPersonsAndStats;
+import com.safetynetalerts.api.domain.model.ChildAlertModel;
+import com.safetynetalerts.api.domain.model.FireStationModel;
+import com.safetynetalerts.api.domain.model.PhoneAlertModel;
 import com.safetynetalerts.api.domain.service.SnaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +20,25 @@ public class SnaController {
     private SnaService snaService;
 
     @GetMapping("/firestation")
-    public CoveredPersonsAndStats getCoveredPersonsAndStatsByFireStation(@RequestParam int stationNumber) {
-        LOGGER.info("request to get Covered Persons And Stats By FireStation : " + stationNumber);
-        return snaService.getCoveredPersonsAndStatsByFireStation(stationNumber);
+    public FireStationModel getFireStationModel(@RequestParam int stationNumber) {
+        LOGGER.info("request to get FireStationModel of station : " + stationNumber);
+        return snaService.getFireStationModel(stationNumber);
         //TODO : add wrong cases and log ?
     }
 
     @GetMapping("/childAlert")
-    public AlertedChildrenAndAdults getAlertedChildrenAndAdultsByAddress(@RequestParam String address) {
-        LOGGER.info("request to get Alerted Children And Adults By Address : " + address);
-        return snaService.getAlertedChildrenAndAdultsByAddress(address);
+    public ChildAlertModel getChildAlertModel(@RequestParam String address) {
+        LOGGER.info("request to get ChildAlertModel of Address : " + address);
+        return snaService.getChildAlertModel(address);
         //TODO : add wrong cases and log ?
     }
+
+    @GetMapping("/phoneAlert")
+    public PhoneAlertModel getPhoneAlertModel(@RequestParam int firestation_number) {
+        LOGGER.info("request to get PhoneAlertModel of firestation : " + firestation_number);
+        return snaService.getPhoneAlertModel(firestation_number);
+        //TODO : add wrong cases and log ?
+    }
+
 
 }
