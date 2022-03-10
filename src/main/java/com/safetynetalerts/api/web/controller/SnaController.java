@@ -1,6 +1,7 @@
 package com.safetynetalerts.api.web.controller;
 
 import com.safetynetalerts.api.domain.model.ChildAlertModel;
+import com.safetynetalerts.api.domain.model.FireModel;
 import com.safetynetalerts.api.domain.model.FireStationModel;
 import com.safetynetalerts.api.domain.model.PhoneAlertModel;
 import com.safetynetalerts.api.domain.service.SnaService;
@@ -40,5 +41,11 @@ public class SnaController {
         //TODO : add wrong cases and log ?
     }
 
+    @GetMapping("/fire")
+    public FireModel getFireModel(@RequestParam String address) {
+        LOGGER.info("request to get FireModel of address : " + address);
+        return snaService.getFireModel(address);
+        //TODO : add wrong cases and log ?
+    }
 
 }
