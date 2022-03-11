@@ -1,5 +1,6 @@
 package com.safetynetalerts.api.data.entity;
 
+import com.googlecode.jmapper.annotations.JMap;
 import lombok.Data;
 
 import javax.persistence.Entity;
@@ -8,12 +9,16 @@ import javax.persistence.Id;
 
 @Data
 @Entity
-public class FireStation {
+public class FireStationEntity {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private long Id;
 
-    private String address;
+    //TODO encapsuler list<address> dans station ?
+    @JMap
     private int station;
+    @JMap
+    private String address;
+
 }

@@ -1,5 +1,6 @@
 package com.safetynetalerts.api.data.entity;
 
+import com.googlecode.jmapper.annotations.JMap;
 import lombok.Data;
 
 import javax.persistence.ElementCollection;
@@ -11,20 +12,27 @@ import java.util.List;
 
 @Data
 @Entity
-public class Person {
+public class PersonEntity {
 
     @Id
     @GeneratedValue
     private Long id;
 
+    @JMap
     private String firstName;
+    @JMap
     private String lastName;
+    @JMap
     private String address;
-    private int fireStation;
+    @JMap
     private String city;
+    @JMap
     private String zip;
+    @JMap
     private String phone;
+    @JMap
     private String email;
+    
     private LocalDate birthdate;
 
     @ElementCollection
@@ -32,4 +40,7 @@ public class Person {
 
     @ElementCollection
     private List<String> allergies;
+
+    //TODO : make a list ?
+    private int fireStation;
 }

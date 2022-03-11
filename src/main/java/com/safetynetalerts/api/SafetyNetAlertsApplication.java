@@ -20,6 +20,8 @@ public class SafetyNetAlertsApplication implements CommandLineRunner {
         SpringApplication.run(SafetyNetAlertsApplication.class, args);
     }
 
+
+    //TODO : move to AppConfigurations
     @Override
     public void run(String... args) {
         try {
