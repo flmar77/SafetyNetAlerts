@@ -23,6 +23,8 @@ public class SnaService {
 
     private final JMapper<Person, PersonEntity> personMapper = new JMapper<>(Person.class, PersonEntity.class);
 
+    private final int majorityAge = 18;
+
     public List<Person> getPersonsByStation(int stationNumber) {
 
         List<PersonEntity> personsByFireStation = personDao.findAllByFireStation(stationNumber);
@@ -30,7 +32,7 @@ public class SnaService {
         return personsByFireStation.stream()
                 .map(personEntity -> {
                     Person person = personMapper.getDestination(personEntity);
-                    person.setAge(getAge(personEntity));
+                    person.setAge(getAgeOfPerson(personEntity));
                     return person;
                 })
                 .collect(Collectors.toList());
@@ -43,38 +45,38 @@ public class SnaService {
         return personsByAddress.stream()
                 .map(personEntity -> {
                     Person person = personMapper.getDestination(personEntity);
-                    person.setAge(getAge(personEntity));
+                    person.setAge(getAgeOfPerson(personEntity));
                     return person;
                 })
                 .collect(Collectors.toList());
     }
 
-    private int getAge(PersonEntity personEntity) {
+    private int getAgeOfPerson(PersonEntity personEntity) {
         LocalDate localDateNow = dateHelper.now();
         return Period.between(personEntity.getBirthdate(), localDateNow).getYears();
     }
 
     public long getChildCounter(List<Person> persons) {
         return persons.stream()
-                .filter(person -> person.getAge() <= 18)
+                .filter(person -> person.getAge() <= majorityAge)
                 .count();
     }
 
     public long getAdultCounter(List<Person> persons) {
         return persons.stream()
-                .filter(person -> person.getAge() > 18)
+                .filter(person -> person.getAge() > majorityAge)
                 .count();
     }
 
     public List<Person> getChildren(List<Person> persons) {
         return persons.stream()
-                .filter(person -> person.getAge() <= 18)
+                .filter(person -> person.getAge() <= majorityAge)
                 .collect(Collectors.toList());
     }
 
     public List<Person> getAdults(List<Person> persons) {
         return persons.stream()
-                .filter(person -> person.getAge() > 18)
+                .filter(person -> person.getAge() > majorityAge)
                 .collect(Collectors.toList());
     }
 
