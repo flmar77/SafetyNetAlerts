@@ -1,19 +1,16 @@
-package com.safetynetalerts.api.domain.model;
+package com.safetynetalerts.api.web.dto;
 
-import com.googlecode.jmapper.annotations.JMap;
+import com.googlecode.jmapper.annotations.JGlobalMap;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class FirePersonModel {
-    @JMap
+@JGlobalMap
+public class FirePersonDto {
     private String lastName;
-    @JMap
     private String phone;
     private int age;
-    @JMap
     private List<String> medications;
-    @JMap
     private List<String> allergies;
 }

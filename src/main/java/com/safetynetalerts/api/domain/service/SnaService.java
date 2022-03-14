@@ -3,14 +3,13 @@ package com.safetynetalerts.api.domain.service;
 import com.googlecode.jmapper.JMapper;
 import com.safetynetalerts.api.data.dao.PersonDao;
 import com.safetynetalerts.api.data.entity.PersonEntity;
-import com.safetynetalerts.api.domain.model.*;
+import com.safetynetalerts.api.domain.model.Person;
 import com.safetynetalerts.api.helper.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,91 +21,68 @@ public class SnaService {
     @Autowired
     private DateHelper dateHelper;
 
-    public FireStationModel getFireStationModel(int stationNumber) {
-        FireStationModel firestationModel = new FireStationModel();
-        firestationModel.setFireStationPersonModels(new ArrayList<>());
-        firestationModel.setAdultCounter(0);
-        firestationModel.setChildCounter(0);
-        LocalDate localDateNow = dateHelper.now();
-        JMapper<FireStationPersonModel, PersonEntity> personMapper = new JMapper<>(FireStationPersonModel.class, PersonEntity.class);
+    private final JMapper<Person, PersonEntity> personMapper = new JMapper<>(Person.class, PersonEntity.class);
+
+    public List<Person> getPersonsByStation(int stationNumber) {
 
         List<PersonEntity> personsByFireStation = personDao.findAllByFireStation(stationNumber);
 
-        List<FireStationPersonModel> fireStationPersons = new ArrayList<>();
-        for (PersonEntity personEntityByFireStation : personsByFireStation) {
-            FireStationPersonModel fireStationPerson = personMapper.getDestination(personEntityByFireStation);
-            fireStationPersons.add(fireStationPerson);
-            if (Period.between(personEntityByFireStation.getBirthdate(), localDateNow).getYears() <= 18) {
-                firestationModel.setChildCounter(firestationModel.getChildCounter() + 1);
-            } else {
-                firestationModel.setAdultCounter(firestationModel.getAdultCounter() + 1);
-            }
-        }
-        firestationModel.setFireStationPersonModels(fireStationPersons);
-
-        return firestationModel;
+        return personsByFireStation.stream()
+                .map(personEntity -> {
+                    Person person = personMapper.getDestination(personEntity);
+                    person.setAge(getAge(personEntity));
+                    return person;
+                })
+                .collect(Collectors.toList());
     }
 
-    public ChildAlertModel getChildAlertModel(String address) {
-        ChildAlertModel childAlertModel = new ChildAlertModel();
-        childAlertModel.setAlertedChildren(new ArrayList<>());
-        childAlertModel.setAlertedAdults(new ArrayList<>());
+    public List<Person> getPersonsByAddress(String address) {
+
+        List<PersonEntity> personsByAddress = personDao.findAllByAddress(address);
+
+        return personsByAddress.stream()
+                .map(personEntity -> {
+                    Person person = personMapper.getDestination(personEntity);
+                    person.setAge(getAge(personEntity));
+                    return person;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private int getAge(PersonEntity personEntity) {
         LocalDate localDateNow = dateHelper.now();
-        JMapper<ChildAlertPersonModel, PersonEntity> personMapper = new JMapper<>(ChildAlertPersonModel.class, PersonEntity.class);
-
-        List<PersonEntity> personsByAddresses = personDao.findAllByAddress(address);
-
-        List<ChildAlertPersonModel> alertedChildrenList = new ArrayList<>();
-        List<ChildAlertPersonModel> alertedAdultsList = new ArrayList<>();
-        for (PersonEntity personEntityByAddress : personsByAddresses) {
-            ChildAlertPersonModel childAlertPersonModel = personMapper.getDestination(personEntityByAddress);
-            childAlertPersonModel.setAge(Period.between(personEntityByAddress.getBirthdate(), localDateNow).getYears());
-            if (childAlertPersonModel.getAge() <= 18) {
-                alertedChildrenList.add(childAlertPersonModel);
-            } else {
-                alertedAdultsList.add(childAlertPersonModel);
-            }
-        }
-        childAlertModel.setAlertedChildren(alertedChildrenList);
-        childAlertModel.setAlertedAdults(alertedAdultsList);
-
-        return childAlertModel;
+        return Period.between(personEntity.getBirthdate(), localDateNow).getYears();
     }
 
-    public PhoneAlertModel getPhoneAlertModel(int firestation_number) {
-        PhoneAlertModel phoneAlertModel = new PhoneAlertModel();
-        phoneAlertModel.setPhones(new ArrayList<>());
-
-        List<PersonEntity> personsByFireStation = personDao.findAllByFireStation(firestation_number);
-
-        List<String> rawPhones = new ArrayList<>();
-        for (PersonEntity personEntityByFireStation : personsByFireStation) {
-            rawPhones.add(personEntityByFireStation.getPhone());
-        }
-        List<String> phones = rawPhones.stream().distinct().collect(Collectors.toList());
-        phoneAlertModel.setPhones(phones);
-
-        return phoneAlertModel;
+    public long getChildCounter(List<Person> persons) {
+        return persons.stream()
+                .filter(person -> person.getAge() <= 18)
+                .count();
     }
 
-    public FireModel getFireModel(String address) {
-        FireModel fireModel = new FireModel();
-        fireModel.setFirePersons(new ArrayList<>());
-        fireModel.setFireStation(-1);
-        LocalDate localDateNow = dateHelper.now();
-        JMapper<FirePersonModel, PersonEntity> personMapper = new JMapper<>(FirePersonModel.class, PersonEntity.class);
+    public long getAdultCounter(List<Person> persons) {
+        return persons.stream()
+                .filter(person -> person.getAge() > 18)
+                .count();
+    }
 
-        List<PersonEntity> personsByAddresses = personDao.findAllByAddress(address);
+    public List<Person> getChildren(List<Person> persons) {
+        return persons.stream()
+                .filter(person -> person.getAge() <= 18)
+                .collect(Collectors.toList());
+    }
 
-        List<FirePersonModel> firePersons = new ArrayList<>();
-        for (PersonEntity personEntityByAddress : personsByAddresses) {
-            FirePersonModel firePerson = personMapper.getDestination(personEntityByAddress);
-            firePerson.setAge(Period.between(personEntityByAddress.getBirthdate(), localDateNow).getYears());
-            firePersons.add(firePerson);
-            fireModel.setFireStation(personEntityByAddress.getFireStation());
+    public List<Person> getAdults(List<Person> persons) {
+        return persons.stream()
+                .filter(person -> person.getAge() > 18)
+                .collect(Collectors.toList());
+    }
+
+    public int getFireStation(List<Person> persons) {
+        if (persons.size() > 0) {
+            return persons.get(0).getFireStation();
+        } else {
+            return 0;
         }
-        fireModel.setFirePersons(firePersons);
-
-        return fireModel;
     }
 }

@@ -1,13 +1,12 @@
-package com.safetynetalerts.api.domain.model;
+package com.safetynetalerts.api.web.dto;
 
 import com.googlecode.jmapper.annotations.JGlobalMap;
 import lombok.Data;
 
 @Data
 @JGlobalMap
-public class FireStationPersonModel {
+public class ChildAlertPersonDto {
     private String firstName;
     private String lastName;
-    private String address;
-    private String phone;
+    private int age;
 }
