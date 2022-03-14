@@ -91,7 +91,6 @@ public class SnaServiceTest {
         //then
         assertThat(actualFireStationModel).isEqualTo(expectedFireStationModel);
     }
-    //TODO : wrong test ?
 
     @Test
     public void should_returnValidData_whenGetChildAlertModel() {
@@ -116,7 +115,6 @@ public class SnaServiceTest {
         //then
         assertThat(actualChildAlertModel).isEqualTo(expectedChildAlertModel);
     }
-    //TODO : wrong test ?
 
     @Test
     public void should_returnValidData_whenGetPhoneAlertModel() {
@@ -136,7 +134,6 @@ public class SnaServiceTest {
         //then
         assertThat(actualPhoneAlertModel).isEqualTo(expectedPhoneAlertModel);
     }
-    //TODO : wrong test ?
 
     @Test
     public void should_returnValidData_whenGetFireModel() {
@@ -161,6 +158,5 @@ public class SnaServiceTest {
         //then
         assertThat(actualFireModel).isEqualTo(expectedFireModel);
     }
-    //TODO : wrong test ?
 
 }
