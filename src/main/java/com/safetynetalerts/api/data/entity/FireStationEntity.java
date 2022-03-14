@@ -1,24 +1,20 @@
 package com.safetynetalerts.api.data.entity;
 
-import com.googlecode.jmapper.annotations.JMap;
 import lombok.Data;
 
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.List;
 
 @Data
 @Entity
 public class FireStationEntity {
 
     @Id
-    @GeneratedValue
-    private long Id;
-
-    //TODO encapsuler list<address> dans station ?
-    @JMap
     private int station;
-    @JMap
-    private String address;
+
+    @ElementCollection
+    private List<String> addresses;
 
 }

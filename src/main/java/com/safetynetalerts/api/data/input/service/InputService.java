@@ -17,7 +17,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,10 +48,20 @@ public class InputService {
     }
 
     private List<FireStationEntity> extractFireStation(List<FireStationInputModel> fireStationInputModels) {
-        JMapper<FireStationEntity, FireStationInputModel> fireStationMapper = new JMapper<>(FireStationEntity.class, FireStationInputModel.class);
-        return fireStationInputModels.stream()
-                .map(fireStationMapper::getDestination)
-                .collect(Collectors.toList());
+        List<FireStationEntity> fireStationEntities = new ArrayList<>();
+
+        Map<Integer, List<String>> fireStationInputModelsByStation = fireStationInputModels.stream()
+                .collect(Collectors.groupingBy(FireStationInputModel::getStation
+                        , Collectors.mapping(FireStationInputModel::getAddress,
+                                Collectors.toList())));
+
+        for (Map.Entry<Integer, List<String>> fireStationInputModelByStation : fireStationInputModelsByStation.entrySet()) {
+            FireStationEntity fireStationEntity = new FireStationEntity();
+            fireStationEntity.setStation((fireStationInputModelByStation.getKey()));
+            fireStationEntity.setAddresses((fireStationInputModelByStation.getValue()));
+            fireStationEntities.add(fireStationEntity);
+        }
+        return fireStationEntities;
     }
 
     private List<PersonEntity> extractPersonEntityFromPersonInputModel(List<PersonInputModel> personInputModels) {
@@ -78,10 +90,11 @@ public class InputService {
         return personEntities.stream()
                 .peek(personEntity -> {
                     FireStationEntity fireStationEntity = fireStationEntities.stream()
-                            .filter(fireStationEntity1 -> personEntity.getAddress().equals(fireStationEntity1.getAddress()))
+                            .filter(fireStationEntity1 -> fireStationEntity1.getAddresses().contains(personEntity.getAddress()))
                             .findFirst().get();
                     personEntity.setFireStation(fireStationEntity.getStation());
                 })
                 .collect(Collectors.toList());
     }
+    
 }
