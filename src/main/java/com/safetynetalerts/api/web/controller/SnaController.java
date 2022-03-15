@@ -24,7 +24,7 @@ public class SnaController {
     public FireStationDto getFireStationDto(@RequestParam int stationNumber) {
         log.info("request to get FireStationDto of station : {}", stationNumber);
 
-        FireStationDto firestationDto = new FireStationDto();
+        FireStationDto fireStationDto = new FireStationDto();
 
         List<Person> personList = snaService.getPersonsByStation(stationNumber);
 
@@ -32,12 +32,12 @@ public class SnaController {
         List<FireStationPersonDto> fireStationPersons = personList.stream()
                 .map(personMapper::getDestination)
                 .collect(Collectors.toList());
-        firestationDto.setFireStationPersons(fireStationPersons);
+        fireStationDto.setFireStationPersons(fireStationPersons);
 
-        firestationDto.setChildCounter(snaService.getChildCounter(personList));
-        firestationDto.setAdultCounter(snaService.getAdultCounter(personList));
+        fireStationDto.setChildCounter(snaService.getChildCounter(personList));
+        fireStationDto.setAdultCounter(snaService.getAdultCounter(personList));
 
-        return firestationDto;
+        return fireStationDto;
     }
 
     @GetMapping("/childAlert")
