@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -97,6 +99,33 @@ public class SnaController {
         fireDto.setFireStation(snaService.getFireStation(personList));
 
         return fireDto;
+    }
+
+    @GetMapping("/stations")
+    public StationsDto getStationsDto(@RequestParam int stationNumber) {
+        log.info("request to get StationsDto of station : {}", stationNumber);
+
+        StationsDto stationsDto = new StationsDto();
+
+        List<Person> personList = snaService.getPersonsByStation(stationNumber);
+
+        JMapper<StationsPersonDto, Person> personMapper = new JMapper<>(StationsPersonDto.class, Person.class);
+        Map<String, List<StationsPersonDto>> stationsPersonsByAddresses = personList.stream()
+                .collect(Collectors.groupingBy(Person::getAddress
+                        , Collectors.mapping(personMapper::getDestination,
+                                Collectors.toList())));
+
+        List<StationsPersonByAddressDto> personsByAddress = new ArrayList<>();
+        for (Map.Entry<String, List<StationsPersonDto>> stationsPersonsByAddress : stationsPersonsByAddresses.entrySet()) {
+            StationsPersonByAddressDto stationsPersonByAddressDto = new StationsPersonByAddressDto();
+            stationsPersonByAddressDto.setAddress((stationsPersonsByAddress.getKey()));
+            stationsPersonByAddressDto.setStationsPersons((stationsPersonsByAddress.getValue()));
+            personsByAddress.add(stationsPersonByAddressDto);
+        }
+
+        stationsDto.setPersonsByAddress(personsByAddress);
+
+        return stationsDto;
     }
 
 }

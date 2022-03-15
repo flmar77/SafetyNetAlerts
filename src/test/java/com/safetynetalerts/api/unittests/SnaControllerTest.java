@@ -50,7 +50,7 @@ public class SnaControllerTest {
         p1.setAge(18);
         p2.setFirstName("p2FirstName");
         p2.setLastName("p2LastName");
-        p2.setAddress("p1Address");
+        p2.setAddress("p2Address");
         p2.setPhone("p1Phone");
         p2.setBirthdate(LocalDate.of(2001, 1, 2));
         p2.setMedications(Arrays.asList("p2Med1:1mg", "p2Med2:2mg"));
@@ -77,7 +77,7 @@ public class SnaControllerTest {
                 "{\n" +
                 "\"firstName\": \"p2FirstName\",\n" +
                 "\"lastName\": \"p2LastName\",\n" +
-                "\"address\": \"p1Address\",\n" +
+                "\"address\": \"p2Address\",\n" +
                 "\"phone\": \"p1Phone\"\n" +
                 "}\n" +
                 "],\n" +
@@ -236,5 +236,67 @@ public class SnaControllerTest {
                 .andExpect(content().json(expectedJson));
     }
 
+    @Test
+    public void should_returnPopulatedStationsDto_whenGetStationsDtoOfPopulatedStation() throws Exception {
+        when(snaService.getPersonsByStation(anyInt())).thenReturn(personList);
+
+        var expectedJson = "{\n" +
+                "\"personsByAddress\": [\n" +
+                "{\n" +
+                "\"address\": \"p2Address\",\n" +
+                "\"stationsPersons\": [\n" +
+                "{\n" +
+                "\"lastName\": \"p2LastName\",\n" +
+                "\"phone\": \"p1Phone\",\n" +
+                "\"age\": 19,\n" +
+                "\"medications\": [\n" +
+                "\"p2Med1:1mg\",\n" +
+                "\"p2Med2:2mg\"\n" +
+                "],\n" +
+                "\"allergies\": [\n" +
+                "\"p2All1\",\n" +
+                "\"p2All2\"\n" +
+                "]\n" +
+                "}\n" +
+                "]\n" +
+                "},\n" +
+                "{\n" +
+                "\"address\": \"p1Address\",\n" +
+                "\"stationsPersons\": [\n" +
+                "{\n" +
+                "\"lastName\": \"p1LastName\",\n" +
+                "\"phone\": \"p1Phone\",\n" +
+                "\"age\": 18,\n" +
+                "\"medications\": [\n" +
+                "\"p1Med1:1mg\",\n" +
+                "\"p1Med2:2mg\"\n" +
+                "],\n" +
+                "\"allergies\": [\n" +
+                "\"p1All1\",\n" +
+                "\"p1All2\"\n" +
+                "]\n" +
+                "}\n" +
+                "]\n" +
+                "}\n" +
+                "]\n" +
+                "}";
+
+        mockMvc.perform(get("/stations?stationNumber=1"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+    }
+
+    @Test
+    public void should_returnEmptyStationsDto_whenGetStationsDtoOfEmptyStation() throws Exception {
+        when(snaService.getPersonsByStation(anyInt())).thenReturn(personEmptyList);
+
+        var expectedJson = "{\n" +
+                "\"personsByAddress\": []\n" +
+                "}";
+
+        mockMvc.perform(get("/stations?stationNumber=1"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+    }
 
 }
