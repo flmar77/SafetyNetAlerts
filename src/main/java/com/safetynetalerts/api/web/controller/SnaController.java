@@ -145,4 +145,20 @@ public class SnaController {
         return personInfoDto;
     }
 
+    @GetMapping("/communityEmail")
+    public CommunityEmailDto getCommunityEmailDto(@RequestParam String city) {
+        log.info("request to get CommunityEmailDto of city : {}", city);
+
+        CommunityEmailDto communityEmailDto = new CommunityEmailDto();
+
+        List<Person> personList = snaService.getPersonsByCity(city);
+
+        List<String> emails = personList.stream()
+                .map(Person::getEmail)
+                .collect(Collectors.toList());
+        communityEmailDto.setEmails(emails);
+
+        return communityEmailDto;
+    }
+
 }

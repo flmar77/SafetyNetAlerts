@@ -26,24 +26,23 @@ public class SnaService {
     private final int majorityAge = 18;
 
     public List<Person> getPersonsByStation(int stationNumber) {
-
         List<PersonEntity> personsByFireStation = personDao.findAllByFireStation(stationNumber);
-
         return convertPersonsEntityToPersons(personsByFireStation);
     }
 
     public List<Person> getPersonsByAddress(String address) {
-
         List<PersonEntity> personsByAddress = personDao.findAllByAddress(address);
-
         return convertPersonsEntityToPersons(personsByAddress);
     }
 
     public List<Person> getPersonsByFirstNameAndLastName(String firstName, String lastName) {
-
         List<PersonEntity> personsByFirstNameAndLastName = personDao.findAllByFirstNameAndLastName(firstName, lastName);
-
         return convertPersonsEntityToPersons(personsByFirstNameAndLastName);
+    }
+
+    public List<Person> getPersonsByCity(String city) {
+        List<PersonEntity> personsByCity = personDao.findAllByCity(city);
+        return convertPersonsEntityToPersons(personsByCity);
     }
 
     private List<Person> convertPersonsEntityToPersons(List<PersonEntity> personsByFireStation) {
@@ -92,5 +91,6 @@ public class SnaService {
             return 0;
         }
     }
+
 
 }

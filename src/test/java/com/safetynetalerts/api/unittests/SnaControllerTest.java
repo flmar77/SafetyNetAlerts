@@ -393,4 +393,33 @@ public class SnaControllerTest {
                 .andExpect(content().json(expectedJson));
     }
 
+    @Test
+    public void should_returnPopulatedCommunityEmailDto_whenGetCommunityEmailDtoOfPopulatedCity() throws Exception {
+        when(snaService.getPersonsByCity(anyString())).thenReturn(personList);
+
+        var expectedJson = "{\n" +
+                "\"emails\": [\n" +
+                "\"p1@email.com\",\n" +
+                "\"p2@email.com\"\n" +
+                "]\n" +
+                "}";
+
+        mockMvc.perform(get("/communityEmail?city=x"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+    }
+
+    @Test
+    public void should_returnEmptyCommunityEmailDto_whenGetCommunityEmailDtoOfEmptyCity() throws Exception {
+        when(snaService.getPersonsByCity(anyString())).thenReturn(personEmptyList);
+
+        var expectedJson = "{\n" +
+                "\"emails\": []\n" +
+                "}";
+
+        mockMvc.perform(get("/communityEmail?city=x"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+    }
+
 }

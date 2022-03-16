@@ -156,4 +156,12 @@ public class SnaServiceTest {
         assertThat(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).isEqualTo(Collections.singletonList(p1));
     }
 
+    @Test
+    public void should_returnPopulatedPersonList_whenGetPersonsByCityOfPopulatedCity() {
+        when(personDao.findAllByCity(anyString())).thenReturn(personEntityList);
+        when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
+
+        assertThat(snaService.getPersonsByCity(anyString())).isEqualTo(personList);
+    }
+
 }
