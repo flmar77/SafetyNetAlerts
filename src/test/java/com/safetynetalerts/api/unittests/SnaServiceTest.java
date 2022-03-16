@@ -148,4 +148,12 @@ public class SnaServiceTest {
         assertThat(snaService.getFireStation(personEmptyList)).isEqualTo(0);
     }
 
+    @Test
+    public void should_returnPopulatedPersonList_whenGetPersonsByFirstNameAndLastNameOfExistingPerson() {
+        when(personDao.findAllByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(pe1));
+        when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
+
+        assertThat(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).isEqualTo(Collections.singletonList(p1));
+    }
+
 }

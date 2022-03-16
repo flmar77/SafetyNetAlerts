@@ -11,4 +11,6 @@ public interface PersonDao extends CrudRepository<PersonEntity, Long> {
     List<PersonEntity> findAllByFireStation(int fireStation);
 
     List<PersonEntity> findAllByAddress(String Address);
+
+    List<PersonEntity> findAllByFirstNameAndLastName(String firstName, String lastName);
 }

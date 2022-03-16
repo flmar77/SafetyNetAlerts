@@ -48,6 +48,7 @@ public class SnaControllerTest {
         p1.setAllergies(Arrays.asList("p1All1", "p1All2"));
         p1.setFireStation(1);
         p1.setAge(18);
+        p1.setEmail("p1@email.com");
         p2.setFirstName("p2FirstName");
         p2.setLastName("p2LastName");
         p2.setAddress("p2Address");
@@ -57,6 +58,7 @@ public class SnaControllerTest {
         p2.setAllergies(Arrays.asList("p2All1", "p2All2"));
         p2.setFireStation(1);
         p2.setAge(19);
+        p2.setEmail("p2@email.com");
         personList = Arrays.asList(p1, p2);
     }
 
@@ -295,6 +297,98 @@ public class SnaControllerTest {
                 "}";
 
         mockMvc.perform(get("/stations?stationNumber=1"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+    }
+
+    @Test
+    public void should_returnPopulatedPersonInfoDto_whenGetPersonInfoDtoOfExistingPerson() throws Exception {
+        when(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(p1));
+
+        var expectedJson = "{\n" +
+                "\"personsInfo\": [\n" +
+                "{\n" +
+                "\"lastName\": \"p1LastName\",\n" +
+                "\"address\": \"p1Address\",\n" +
+                "\"age\": 18,\n" +
+                "\"email\": \"p1@email.com\",\n" +
+                "\"medications\": [\n" +
+                "\"p1Med1:1mg\",\n" +
+                "\"p1Med2:2mg\"\n" +
+                "],\n" +
+                "\"allergies\": [\n" +
+                "\"p1All1\",\n" +
+                "\"p1All2\"\n" +
+                "]\n" +
+                "}\n" +
+                "]\n" +
+                "}";
+
+        mockMvc.perform(get("/personInfo?firstName=a&lastName=b"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+    }
+
+    @Test
+    public void should_returnPopulatedPersonsInfoDto_whenGetPersonInfoDtoOfNamesakesPersons() throws Exception {
+        Person p3 = new Person();
+        p3.setFirstName("p1FirstName");
+        p3.setLastName("p1LastName");
+        p3.setAddress("p3Address");
+        p3.setMedications(Arrays.asList("p3Med1:1mg", "p3Med2:2mg"));
+        p3.setAllergies(Arrays.asList("p3All1", "p3All2"));
+        p3.setAge(30);
+        p3.setEmail("p3@email.com");
+
+        when(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(Arrays.asList(p1, p3));
+
+        var expectedJson = "{\n" +
+                "\"personsInfo\": [\n" +
+                "{\n" +
+                "\"lastName\": \"p1LastName\",\n" +
+                "\"address\": \"p1Address\",\n" +
+                "\"age\": 18,\n" +
+                "\"email\": \"p1@email.com\",\n" +
+                "\"medications\": [\n" +
+                "\"p1Med1:1mg\",\n" +
+                "\"p1Med2:2mg\"\n" +
+                "],\n" +
+                "\"allergies\": [\n" +
+                "\"p1All1\",\n" +
+                "\"p1All2\"\n" +
+                "]\n" +
+                "},\n" +
+                "{\n" +
+                "\"lastName\": \"p1LastName\",\n" +
+                "\"address\": \"p3Address\",\n" +
+                "\"age\": 30,\n" +
+                "\"email\": \"p3@email.com\",\n" +
+                "\"medications\": [\n" +
+                "\"p3Med1:1mg\",\n" +
+                "\"p3Med2:2mg\"\n" +
+                "],\n" +
+                "\"allergies\": [\n" +
+                "\"p3All1\",\n" +
+                "\"p3All2\"\n" +
+                "]\n" +
+                "}\n" +
+                "]\n" +
+                "}";
+
+        mockMvc.perform(get("/personInfo?firstName=a&lastName=b"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+    }
+
+    @Test
+    public void should_returnEmptyPersonInfoDto_whenGetPersonInfoDtoOfNonExistingPerson() throws Exception {
+        when(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(personEmptyList);
+
+        var expectedJson = "{\n" +
+                "\"personsInfo\": []\n" +
+                "}";
+
+        mockMvc.perform(get("/personInfo?firstName=a&lastName=b"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));
     }

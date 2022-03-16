@@ -29,20 +29,25 @@ public class SnaService {
 
         List<PersonEntity> personsByFireStation = personDao.findAllByFireStation(stationNumber);
 
-        return personsByFireStation.stream()
-                .map(personEntity -> {
-                    Person person = personMapper.getDestination(personEntity);
-                    person.setAge(getAgeOfPerson(personEntity));
-                    return person;
-                })
-                .collect(Collectors.toList());
+        return convertPersonsEntityToPersons(personsByFireStation);
     }
 
     public List<Person> getPersonsByAddress(String address) {
 
         List<PersonEntity> personsByAddress = personDao.findAllByAddress(address);
 
-        return personsByAddress.stream()
+        return convertPersonsEntityToPersons(personsByAddress);
+    }
+
+    public List<Person> getPersonsByFirstNameAndLastName(String firstName, String lastName) {
+
+        List<PersonEntity> personsByFirstNameAndLastName = personDao.findAllByFirstNameAndLastName(firstName, lastName);
+
+        return convertPersonsEntityToPersons(personsByFirstNameAndLastName);
+    }
+
+    private List<Person> convertPersonsEntityToPersons(List<PersonEntity> personsByFireStation) {
+        return personsByFireStation.stream()
                 .map(personEntity -> {
                     Person person = personMapper.getDestination(personEntity);
                     person.setAge(getAgeOfPerson(personEntity));
@@ -87,4 +92,5 @@ public class SnaService {
             return 0;
         }
     }
+
 }

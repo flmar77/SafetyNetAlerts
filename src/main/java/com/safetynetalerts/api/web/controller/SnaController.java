@@ -128,4 +128,21 @@ public class SnaController {
         return stationsDto;
     }
 
+    @GetMapping("/personInfo")
+    public PersonInfoDto getPersonInfoDto(@RequestParam String firstName, @RequestParam String lastName) {
+        log.info("request to get PersonInfoDto of firstName={} & lastName={}", firstName, lastName);
+
+        PersonInfoDto personInfoDto = new PersonInfoDto();
+
+        List<Person> personList = snaService.getPersonsByFirstNameAndLastName(firstName, lastName);
+
+        JMapper<PersonInfoPersonDto, Person> personMapper = new JMapper<>(PersonInfoPersonDto.class, Person.class);
+        List<PersonInfoPersonDto> personsInfo = personList.stream()
+                .map(personMapper::getDestination)
+                .collect(Collectors.toList());
+        personInfoDto.setPersonsInfo(personsInfo);
+
+        return personInfoDto;
+    }
+
 }
