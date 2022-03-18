@@ -17,9 +17,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,37 +29,41 @@ public class InputService {
     private FireStationDao fireStationDao;
 
     public void loadInMemoryDbFromInput() {
+        // TODO : essayer @Resource ?
         InputStream inputStream = getClass().getResourceAsStream("/static/input.json");
+        //TODO : try/catch
         assert inputStream != null;
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 
         AggregatedInputModel aggregatedInputModel = new Gson().fromJson(inputStreamReader, AggregatedInputModel.class);
 
         List<FireStationEntity> fireStationEntities = extractFireStation(aggregatedInputModel.getFireStationInputModels());
+        // TODO : move to domain service
         fireStationDao.saveAll(fireStationEntities);
 
         List<PersonEntity> personEntities = extractPersonEntityFromPersonInputModel(aggregatedInputModel.getPersonInputModels());
+        // TODO : passer en void
         personEntities = enrichPersonEntityFromMedicalRecordInputModel(personEntities, aggregatedInputModel.getMedicalRecordInputModels());
         personEntities = enrichPersonEntityFromFireStationEntity(personEntities, fireStationEntities);
+        // TODO : move to domain service
         personDao.saveAll(personEntities);
 
     }
 
-    private List<FireStationEntity> extractFireStation(List<FireStationInputModel> fireStationInputModels) {
-        List<FireStationEntity> fireStationEntities = new ArrayList<>();
+    private List<FireStationEntity> extractFireStation(final List<FireStationInputModel> fireStationInputModels) {
 
-        Map<Integer, List<String>> fireStationInputModelsByStation = fireStationInputModels.stream()
+        return fireStationInputModels.stream()
                 .collect(Collectors.groupingBy(FireStationInputModel::getStation
                         , Collectors.mapping(FireStationInputModel::getAddress,
-                                Collectors.toList())));
-
-        for (Map.Entry<Integer, List<String>> fireStationInputModelByStation : fireStationInputModelsByStation.entrySet()) {
-            FireStationEntity fireStationEntity = new FireStationEntity();
-            fireStationEntity.setStation((fireStationInputModelByStation.getKey()));
-            fireStationEntity.setAddresses((fireStationInputModelByStation.getValue()));
-            fireStationEntities.add(fireStationEntity);
-        }
-        return fireStationEntities;
+                                Collectors.toList())))
+                .entrySet().stream()
+                .map(it -> {
+                    FireStationEntity fireStationEntity = new FireStationEntity();
+                    fireStationEntity.setStation((it.getKey()));
+                    fireStationEntity.setAddresses((it.getValue()));
+                    return fireStationEntity;
+                })
+                .collect(Collectors.toList());
     }
 
     private List<PersonEntity> extractPersonEntityFromPersonInputModel(List<PersonInputModel> personInputModels) {
@@ -77,15 +79,18 @@ public class InputService {
                             MedicalRecordInputModel medicalRecord = medicalRecordInputModels.stream()
                                     .filter(medicalRecord1 -> personEntity.getFirstName().equals(medicalRecord1.getFirstName())
                                             && personEntity.getLastName().equals(medicalRecord1.getLastName()))
-                                    .findFirst().get();
-                            personEntity.setBirthdate(LocalDate.parse(medicalRecord.getBirthdate(), DateTimeFormatter.ofPattern("MM/dd/yyyy")));
-                            personEntity.setMedications(medicalRecord.getMedications());
-                            personEntity.setAllergies(medicalRecord.getAllergies());
+                                    .findFirst().orElse(null);
+                            if (medicalRecord != null) {
+                                personEntity.setBirthdate(LocalDate.parse(medicalRecord.getBirthdate(), DateTimeFormatter.ofPattern("MM/dd/yyyy")));
+                                personEntity.setMedications(medicalRecord.getMedications());
+                                personEntity.setAllergies(medicalRecord.getAllergies());
+                            }
                         }
                 )
                 .collect(Collectors.toList());
     }
 
+    //TODO : as above
     private List<PersonEntity> enrichPersonEntityFromFireStationEntity(List<PersonEntity> personEntities, List<FireStationEntity> fireStationEntities) {
         return personEntities.stream()
                 .peek(personEntity -> {
@@ -96,5 +101,5 @@ public class InputService {
                 })
                 .collect(Collectors.toList());
     }
-    
+
 }

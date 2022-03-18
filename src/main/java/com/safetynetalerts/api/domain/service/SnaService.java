@@ -5,12 +5,16 @@ import com.safetynetalerts.api.data.dao.PersonDao;
 import com.safetynetalerts.api.data.entity.PersonEntity;
 import com.safetynetalerts.api.domain.model.Person;
 import com.safetynetalerts.api.helper.DateHelper;
+import com.safetynetalerts.api.web.dto.PersonDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,43 +25,28 @@ public class SnaService {
     @Autowired
     private DateHelper dateHelper;
 
-    private final JMapper<Person, PersonEntity> personMapper = new JMapper<>(Person.class, PersonEntity.class);
+    private final JMapper<Person, PersonEntity> personEntityToPersonMapper = new JMapper<>(Person.class, PersonEntity.class);
 
     private final int majorityAge = 18;
 
     public List<Person> getPersonsByStation(int stationNumber) {
         List<PersonEntity> personsByFireStation = personDao.findAllByFireStation(stationNumber);
-        return convertPersonsEntityToPersons(personsByFireStation);
+        return mapPersonsEntityToPersons(personsByFireStation);
     }
 
     public List<Person> getPersonsByAddress(String address) {
         List<PersonEntity> personsByAddress = personDao.findAllByAddress(address);
-        return convertPersonsEntityToPersons(personsByAddress);
+        return mapPersonsEntityToPersons(personsByAddress);
     }
 
     public List<Person> getPersonsByFirstNameAndLastName(String firstName, String lastName) {
         List<PersonEntity> personsByFirstNameAndLastName = personDao.findAllByFirstNameAndLastName(firstName, lastName);
-        return convertPersonsEntityToPersons(personsByFirstNameAndLastName);
+        return mapPersonsEntityToPersons(personsByFirstNameAndLastName);
     }
 
     public List<Person> getPersonsByCity(String city) {
         List<PersonEntity> personsByCity = personDao.findAllByCity(city);
-        return convertPersonsEntityToPersons(personsByCity);
-    }
-
-    private List<Person> convertPersonsEntityToPersons(List<PersonEntity> personsByFireStation) {
-        return personsByFireStation.stream()
-                .map(personEntity -> {
-                    Person person = personMapper.getDestination(personEntity);
-                    person.setAge(getAgeOfPerson(personEntity));
-                    return person;
-                })
-                .collect(Collectors.toList());
-    }
-
-    private int getAgeOfPerson(PersonEntity personEntity) {
-        LocalDate localDateNow = dateHelper.now();
-        return Period.between(personEntity.getBirthdate(), localDateNow).getYears();
+        return mapPersonsEntityToPersons(personsByCity);
     }
 
     public long getChildCounter(List<Person> persons) {
@@ -92,5 +81,63 @@ public class SnaService {
         }
     }
 
+    public boolean personAlreadyExists(String firstName, String lastName) {
+        Optional<PersonEntity> optionalPersonEntity = personDao.findByFirstNameAndLastName(firstName, lastName);
+        return optionalPersonEntity.isPresent();
+    }
+
+    public List<Person> getAllPersons() {
+        List<PersonEntity> personsEntity = new ArrayList<>();
+        personDao.findAll().forEach(personsEntity::add);
+        return mapPersonsEntityToPersons(personsEntity);
+    }
+
+    public Person savePerson(PersonDto personDto) {
+        return personEntityToPersonMapper.getDestination(personDao.save(mapPersonDtoToPersonEntity(personDto)));
+    }
+
+    public Person updatePerson(String firstName, String lastName, PersonDto personDto) {
+        PersonEntity personEntity = personDao.findByFirstNameAndLastName(firstName, lastName)
+                .orElseThrow(NoSuchElementException::new);
+
+        personEntity.setAddress(personDto.getAddress());
+        personEntity.setCity(personDto.getCity());
+        personEntity.setZip(personDto.getZip());
+        personEntity.setPhone(personDto.getPhone());
+        personEntity.setEmail(personDto.getEmail());
+        personEntity.setBirthdate(personDto.getBirthdate());
+
+        return personEntityToPersonMapper.getDestination(personDao.save(personEntity));
+    }
+
+    public void deletePerson(String firstName, String lastName) {
+        PersonEntity personEntity = personDao.findByFirstNameAndLastName(firstName, lastName)
+                .orElseThrow(NoSuchElementException::new);
+
+        personDao.delete(personEntity);
+    }
+
+
+    private List<Person> mapPersonsEntityToPersons(List<PersonEntity> personsEntity) {
+        return personsEntity.stream()
+                .map(personEntity -> {
+                    Person person = personEntityToPersonMapper.getDestination(personEntity);
+                    person.setAge(getAgeOfPerson(personEntity));
+                    return person;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private int getAgeOfPerson(PersonEntity personEntity) {
+        LocalDate localDateNow = dateHelper.now();
+        return Period.between(personEntity.getBirthdate(), localDateNow).getYears();
+    }
+
+    private PersonEntity mapPersonDtoToPersonEntity(PersonDto personDto) {
+        JMapper<PersonEntity, PersonDto> personDtoToEntityMapper = new JMapper<>(PersonEntity.class, PersonDto.class);
+        PersonEntity personEntityToSave = personDtoToEntityMapper.getDestination(personDto);
+        personEntityToSave.setBirthdate(personDto.getBirthdate());
+        return personEntityToSave;
+    }
 
 }

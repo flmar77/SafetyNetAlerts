@@ -14,10 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -162,6 +159,28 @@ public class SnaServiceTest {
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
         assertThat(snaService.getPersonsByCity(anyString())).isEqualTo(personList);
+    }
+
+    @Test
+    public void should_returnTrue_whenPersonAlreadyExists() {
+        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(pe1));
+
+        assertThat(snaService.personAlreadyExists(anyString(), anyString())).isTrue();
+    }
+
+    @Test
+    public void should_returnFalse_whenPersonNotAlreadyExists() {
+        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
+
+        assertThat(snaService.personAlreadyExists(anyString(), anyString())).isFalse();
+    }
+
+    @Test
+    public void should_returnPopulatedPersonList_whenGetAllPersons() {
+        when(personDao.findAll()).thenReturn(personEntityList);
+        when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
+
+        assertThat(snaService.getAllPersons()).isEqualTo(personList);
     }
 
 }

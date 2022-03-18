@@ -3,16 +3,16 @@ package com.safetynetalerts.api.data.input.model;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class AggregatedInputModel {
     @SerializedName("persons")
-    private ArrayList<PersonInputModel> personInputModels;
+    private List<PersonInputModel> personInputModels;
 
     @SerializedName("firestations")
-    private ArrayList<FireStationInputModel> fireStationInputModels;
+    private List<FireStationInputModel> fireStationInputModels;
 
     @SerializedName("medicalrecords")
-    private ArrayList<MedicalRecordInputModel> medicalRecordInputModels;
+    private List<MedicalRecordInputModel> medicalRecordInputModels;
 }
