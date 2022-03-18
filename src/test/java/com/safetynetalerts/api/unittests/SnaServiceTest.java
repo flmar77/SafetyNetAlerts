@@ -6,6 +6,7 @@ import com.safetynetalerts.api.data.entity.PersonEntity;
 import com.safetynetalerts.api.domain.model.Person;
 import com.safetynetalerts.api.domain.service.SnaService;
 import com.safetynetalerts.api.helper.DateHelper;
+import com.safetynetalerts.api.web.dto.PersonDto;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,9 +18,9 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class SnaServiceTest {
@@ -39,6 +40,7 @@ public class SnaServiceTest {
     private static Person p1;
     private static Person p2;
     private static Person p3;
+    private static PersonDto pd1;
     private static List<PersonEntity> personEntityList;
     private static List<Person> personList;
     private static final List<PersonEntity> personEntityEmptyList = new ArrayList<>();
@@ -72,15 +74,17 @@ public class SnaServiceTest {
         pe3.setFireStation(1);
         personEntityList = Arrays.asList(pe1, pe2, pe3);
 
-        JMapper<Person, PersonEntity> personMapper = new JMapper<>(Person.class, PersonEntity.class);
-        p1 = personMapper.getDestination(pe1);
+        JMapper<Person, PersonEntity> personEntityToPersonMapper = new JMapper<>(Person.class, PersonEntity.class);
+        p1 = personEntityToPersonMapper.getDestination(pe1);
         p1.setAge(18);
-        p2 = personMapper.getDestination(pe2);
+        p2 = personEntityToPersonMapper.getDestination(pe2);
         p2.setAge(18);
-        p3 = personMapper.getDestination(pe3);
+        p3 = personEntityToPersonMapper.getDestination(pe3);
         p3.setAge(19);
         personList = Arrays.asList(p1, p2, p3);
 
+        JMapper<PersonDto, PersonEntity> personEntityToPersonDtoMapper = new JMapper<>(PersonDto.class, PersonEntity.class);
+        pd1 = personEntityToPersonDtoMapper.getDestination(pe1);
 
     }
 
@@ -181,6 +185,46 @@ public class SnaServiceTest {
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
         assertThat(snaService.getAllPersons()).isEqualTo(personList);
+    }
+
+    @Test
+    public void should_returnValidPerson_whenSavePerson() {
+        when(personDao.save(any())).thenReturn(pe1);
+        when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
+
+        assertThat(snaService.savePerson(pd1)).isEqualTo(p1);
+    }
+
+    @Test
+    public void should_returnValidPerson_whenUpdateExistingPerson() {
+        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(pe1));
+        when(personDao.save(any())).thenReturn(pe1);
+        when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
+
+        assertThat(snaService.updatePerson(pd1.getFirstName(), pd1.getLastName(), pd1)).isEqualTo(p1);
+    }
+
+    @Test
+    public void should_throwNoSuchElementException_whenUpdateNonExistingPerson() {
+        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> snaService.updatePerson(anyString(), anyString(), pd1));
+    }
+
+    @Test
+    public void should_delete_whenDeleteExistingPerson() {
+        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(pe1));
+
+        snaService.deletePerson(anyString(), anyString());
+
+        verify(personDao, times(1)).delete(pe1);
+    }
+
+    @Test
+    public void should_throwNoSuchElementException_whenDeleteNonExistingPerson() {
+        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> snaService.deletePerson(anyString(), anyString()));
     }
 
 }

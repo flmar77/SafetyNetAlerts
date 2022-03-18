@@ -93,7 +93,7 @@ public class SnaService {
     }
 
     public Person savePerson(PersonDto personDto) {
-        return personEntityToPersonMapper.getDestination(personDao.save(mapPersonDtoToPersonEntity(personDto)));
+        return mapPersonEntityToPerson(personDao.save(mapPersonDtoToPersonEntity(personDto)));
     }
 
     public Person updatePerson(String firstName, String lastName, PersonDto personDto) {
@@ -107,7 +107,7 @@ public class SnaService {
         personEntity.setEmail(personDto.getEmail());
         personEntity.setBirthdate(personDto.getBirthdate());
 
-        return personEntityToPersonMapper.getDestination(personDao.save(personEntity));
+        return mapPersonEntityToPerson(personDao.save(personEntity));
     }
 
     public void deletePerson(String firstName, String lastName) {
@@ -126,6 +126,12 @@ public class SnaService {
                     return person;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private Person mapPersonEntityToPerson(PersonEntity personEntity) {
+        Person person = personEntityToPersonMapper.getDestination(personEntity);
+        person.setAge(getAgeOfPerson(personEntity));
+        return person;
     }
 
     private int getAgeOfPerson(PersonEntity personEntity) {
