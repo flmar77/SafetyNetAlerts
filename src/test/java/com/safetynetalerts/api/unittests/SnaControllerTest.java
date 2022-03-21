@@ -243,7 +243,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnPopulatedStationsDto_whenGetStationsDtoOfPopulatedStation() throws Exception {
-        when(snaService.getPersonsByStation(anyInt())).thenReturn(personList);
+        when(snaService.getPersonsByStations(anyList())).thenReturn(personList);
 
         var expectedJson = "{\n" +
                 "\"personsByAddress\": [\n" +
@@ -286,20 +286,20 @@ public class SnaControllerTest {
                 "]\n" +
                 "}";
 
-        mockMvc.perform(get("/stations?stationNumber=1"))
+        mockMvc.perform(get("/stations?stationNumbers=1,2"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));
     }
 
     @Test
     public void should_returnEmptyStationsDto_whenGetStationsDtoOfEmptyStation() throws Exception {
-        when(snaService.getPersonsByStation(anyInt())).thenReturn(personEmptyList);
+        when(snaService.getPersonsByStations(anyList())).thenReturn(personEmptyList);
 
         var expectedJson = "{\n" +
                 "\"personsByAddress\": []\n" +
                 "}";
 
-        mockMvc.perform(get("/stations?stationNumber=1"))
+        mockMvc.perform(get("/stations?stationNumbers=1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));
     }

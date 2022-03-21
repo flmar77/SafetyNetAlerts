@@ -89,7 +89,7 @@ public class SnaServiceTest {
     }
 
     @Test
-    public void should_returnPopulatedPersonList_whenGetPersonsByStationOfPopulatedAddress() {
+    public void should_returnPopulatedPersonList_whenGetPersonsByPopulatedStation() {
         when(personDao.findAllByFireStation(anyInt())).thenReturn(personEntityList);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
@@ -97,15 +97,23 @@ public class SnaServiceTest {
     }
 
     @Test
-    public void should_returnEmptyPersonList_whenGetPersonsByStationOfWrongAddress() {
+    public void should_returnEmptyPersonList_whenGetPersonsByWrongStation() {
         when(personDao.findAllByFireStation(anyInt())).thenReturn(personEntityEmptyList);
 
         assertThat(snaService.getPersonsByStation(anyInt())).isEqualTo(personEmptyList);
     }
 
+    @Test
+    public void should_returnPopulatedPersonList_whenGetPersonsByPopulatedStations() {
+        when(personDao.findAllByFireStationIn(anyList())).thenReturn(personEntityList);
+        when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
+
+        assertThat(snaService.getPersonsByStations(anyList())).isEqualTo(personList);
+    }
+
 
     @Test
-    public void should_returnPopulatedPersonList_whenGetPersonsByAddressOfPopulatedAddress() {
+    public void should_returnPopulatedPersonList_whenGetPersonsByPopulatedAddress() {
         when(personDao.findAllByAddress(anyString())).thenReturn(personEntityList);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
@@ -113,7 +121,7 @@ public class SnaServiceTest {
     }
 
     @Test
-    public void should_returnEmptyPersonList_whenGetPersonsByAddressOfWrongAddress() {
+    public void should_returnEmptyPersonList_whenGetPersonsByWrongAddress() {
         when(personDao.findAllByAddress(anyString())).thenReturn(personEntityEmptyList);
 
         assertThat(snaService.getPersonsByAddress(anyString())).isEqualTo(personEmptyList);

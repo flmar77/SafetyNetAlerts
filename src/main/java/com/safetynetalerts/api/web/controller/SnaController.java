@@ -100,14 +100,13 @@ public class SnaController {
         return fireDto;
     }
 
-    // TODO get by List<Station> (personDao.findAllByFireStationIn()) avec flatmap pour écraser les différentes listes récupérées
     @GetMapping("/stations")
-    public StationsDto getStationsDto(@RequestParam int stationNumber) {
-        log.info("request to get StationsDto of station : {}", stationNumber);
+    public StationsDto getStationsDto(@RequestParam List<Integer> stationNumbers) {
+        log.info("request to get StationsDto of stations : {}", stationNumbers);
 
         StationsDto stationsDto = new StationsDto();
 
-        List<Person> personList = snaService.getPersonsByStation(stationNumber);
+        List<Person> personList = snaService.getPersonsByStations(stationNumbers);
 
         JMapper<StationsPersonDto, Person> personMapper = new JMapper<>(StationsPersonDto.class, Person.class);
         List<StationsPersonByAddressDto> personsByAddress = personList.stream()

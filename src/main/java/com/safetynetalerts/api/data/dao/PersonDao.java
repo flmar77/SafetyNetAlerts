@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface PersonDao extends CrudRepository<PersonEntity, Long> {
     List<PersonEntity> findAllByFireStation(int fireStation);
 
+    List<PersonEntity> findAllByFireStationIn(List<Integer> stationNumbers);
+
     List<PersonEntity> findAllByAddress(String Address);
 
     List<PersonEntity> findAllByFirstNameAndLastName(String firstName, String lastName);

@@ -34,6 +34,11 @@ public class SnaService {
         return mapPersonsEntityToPersons(personsByFireStation);
     }
 
+    public List<Person> getPersonsByStations(List<Integer> stationNumbers) {
+        List<PersonEntity> personsByFireStation = personDao.findAllByFireStationIn(stationNumbers);
+        return mapPersonsEntityToPersons(personsByFireStation);
+    }
+
     public List<Person> getPersonsByAddress(String address) {
         List<PersonEntity> personsByAddress = personDao.findAllByAddress(address);
         return mapPersonsEntityToPersons(personsByAddress);
