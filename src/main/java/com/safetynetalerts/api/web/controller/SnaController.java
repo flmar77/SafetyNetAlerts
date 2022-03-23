@@ -1,6 +1,7 @@
 package com.safetynetalerts.api.web.controller;
 
 import com.googlecode.jmapper.JMapper;
+import com.safetynetalerts.api.domain.model.FireStation;
 import com.safetynetalerts.api.domain.model.Person;
 import com.safetynetalerts.api.domain.service.SnaService;
 import com.safetynetalerts.api.web.dto.*;
@@ -10,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityExistsException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -22,7 +25,7 @@ public class SnaController {
     private SnaService snaService;
 
     @GetMapping("/firestation")
-    public FireStationDto getFireStationDto(@RequestParam int stationNumber) {
+    public FireStationDto getFireStationDto(@RequestParam Long stationNumber) {
         log.info("request to get FireStationDto of station : {}", stationNumber);
 
         FireStationDto fireStationDto = new FireStationDto();
@@ -64,7 +67,7 @@ public class SnaController {
     }
 
     @GetMapping("/phoneAlert")
-    public PhoneAlertDto getPhoneAlertDto(@RequestParam int firestation_number) {
+    public PhoneAlertDto getPhoneAlertDto(@RequestParam Long firestation_number) {
         log.info("request to get PhoneAlertDto of station : {}", firestation_number);
 
         PhoneAlertDto phoneAlertDto = new PhoneAlertDto();
@@ -101,7 +104,7 @@ public class SnaController {
     }
 
     @GetMapping("/stations")
-    public StationsDto getStationsDto(@RequestParam List<Integer> stationNumbers) {
+    public StationsDto getStationsDto(@RequestParam List<Long> stationNumbers) {
         log.info("request to get StationsDto of stations : {}", stationNumbers);
 
         StationsDto stationsDto = new StationsDto();
@@ -201,7 +204,7 @@ public class SnaController {
         JMapper<PersonDto, Person> personToPersonDtoMapper = new JMapper<>(PersonDto.class, Person.class);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(personToPersonDtoMapper.getDestination(snaService.savePerson(personDto)));
+                .body(personToPersonDtoMapper.getDestination(snaService.createPerson(personDto)));
 
     }
 
@@ -251,6 +254,147 @@ public class SnaController {
                     .body("successfully delete");
         } catch (NoSuchElementException e) {
             String errorMessage = "error while deleting PersonDto because of non existing person with firstName=" + firstName + " & lastName=" + lastName;
+            log.error(errorMessage);
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(errorMessage);
+        }
+    }
+
+    @GetMapping("/firestations")
+    public List<FireStationsDto> getAllFireStationsDto() {
+        log.info("request to get AllFireStationsDto");
+
+        List<FireStation> fireStationList = snaService.getAllFireStations();
+
+        List<FireStationsDto> fireStationsDtoList = new ArrayList<>();
+
+        for (FireStation fireStation : fireStationList) {
+            for (String address : fireStation.getAddresses()) {
+                FireStationsDto fireStationsDto = new FireStationsDto();
+                fireStationsDto.setStation(fireStation.getStation());
+                fireStationsDto.setAddress(address);
+                fireStationsDtoList.add(fireStationsDto);
+            }
+        }
+        return fireStationsDtoList;
+    }
+
+    @GetMapping("/firestations/{station}&{address}")
+    public ResponseEntity<?> getFireStationsDto(@PathVariable Long station, @PathVariable String address) {
+        log.info("request to get FireStationsDto of station={} & address={}", station, address);
+
+        FireStationsDto fireStationsDto = new FireStationsDto();
+
+        if (station == null || station == 0
+                || address == null || address.equals("")) {
+            String errorMessage = "error while getting FireStationsDto because of wrong station=" + station + " and/or address=" + address;
+            log.error(errorMessage);
+            return ResponseEntity
+                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(errorMessage);
+        }
+
+        try {
+            FireStation fireStation = snaService.getFireStationByStationAndAddress(station, address);
+
+            fireStationsDto.setStation(fireStation.getStation());
+            fireStationsDto.setAddress(fireStation.getAddresses().get(0));
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(fireStationsDto);
+
+        } catch (NoSuchElementException e) {
+            String errorMessage = "error while getting FireStationsDto because of non existing fireStation with station=" + station + " & address=" + address;
+            log.error(errorMessage);
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(errorMessage);
+        }
+    }
+
+    @PostMapping("/firestations")
+    public ResponseEntity<?> createFireStationsDto(@RequestBody FireStationsDto fireStationsDto) {
+        log.info("request to post FireStationsDto : {}", fireStationsDto);
+
+        if (fireStationsDto.getStation() == null || fireStationsDto.getStation() == 0
+                || fireStationsDto.getAddress() == null || fireStationsDto.getAddress().equals("")) {
+            String errorMessage = "error while posting FireStationsDto because of wrong input : " + fireStationsDto;
+            log.error(errorMessage);
+            return ResponseEntity
+                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(errorMessage);
+        }
+
+        try {
+            snaService.createFireStationMapping(fireStationsDto);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(fireStationsDto);
+        } catch (EntityExistsException e) {
+            String errorMessage = "error while posting FireStationsDto because of existing fireStationsDto : " + fireStationsDto;
+            log.error(errorMessage);
+            return ResponseEntity
+                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(errorMessage);
+        }
+
+    }
+
+    @PutMapping("/firestations/{station}&{address}")
+    public ResponseEntity<?> updateFireStationsDto(@PathVariable Long station, @PathVariable String address, @RequestBody FireStationsDto fireStationsDto) {
+        log.info("request to put FireStationsDto : {}", fireStationsDto);
+
+        if (station == null || station == 0
+                || address == null || address.equals("")) {
+            String errorMessage = "error while putting FireStationsDto because of wrong station=" + station + " and/or address" + address;
+            log.error(errorMessage);
+            return ResponseEntity
+                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(errorMessage);
+        }
+
+        try {
+            snaService.updateFireStationMapping(fireStationsDto);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(fireStationsDto);
+        } catch (EntityExistsException e) {
+            String errorMessage = "error while putting FireStationsDto because address=" + address + " already assigned to station=" + station;
+            log.error(errorMessage);
+            return ResponseEntity
+                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(errorMessage);
+        } catch (NoSuchElementException e) {
+            String errorMessage = "error while putting FireStationsDto because of non existing address : " + address;
+            log.error(errorMessage);
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(errorMessage);
+        }
+    }
+
+    @DeleteMapping("/firestations/{station}&{address}")
+    public ResponseEntity<?> deleteFireStationsDto(@PathVariable Long station, @PathVariable String address) {
+        log.info("request to delete mapping of address={} with station={}", address, station);
+
+        if (station == null || station == 0
+                || address == null || address.equals("")) {
+            String errorMessage = "error while deleting FireStationsDto because of wrong station=" + station + " and/or address=" + address;
+            log.error(errorMessage);
+            return ResponseEntity
+                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(errorMessage);
+        }
+
+        try {
+            snaService.deleteFireStationMapping(station, address);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body("successfully delete");
+        } catch (NoSuchElementException e) {
+            String errorMessage = "error while deleting FireStationsDto because of non existing mapping of station=" + station + " and address=" + address;
             log.error(errorMessage);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)

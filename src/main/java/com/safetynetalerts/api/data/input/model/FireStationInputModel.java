@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class FireStationInputModel {
     private String address;
-    private int station;
+    private Long station;
 }

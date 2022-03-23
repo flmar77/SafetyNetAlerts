@@ -12,7 +12,7 @@ import java.util.List;
 public class FireStationEntity {
 
     @Id
-    private int station;
+    private Long station;
 
     @ElementCollection
     private List<String> addresses;

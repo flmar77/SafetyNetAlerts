@@ -1,20 +1,22 @@
 package com.safetynetalerts.api.domain.service;
 
 import com.googlecode.jmapper.JMapper;
+import com.safetynetalerts.api.data.dao.FireStationDao;
 import com.safetynetalerts.api.data.dao.PersonDao;
+import com.safetynetalerts.api.data.entity.FireStationEntity;
 import com.safetynetalerts.api.data.entity.PersonEntity;
+import com.safetynetalerts.api.domain.model.FireStation;
 import com.safetynetalerts.api.domain.model.Person;
 import com.safetynetalerts.api.helper.DateHelper;
+import com.safetynetalerts.api.web.dto.FireStationsDto;
 import com.safetynetalerts.api.web.dto.PersonDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityExistsException;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,18 +25,20 @@ public class SnaService {
     @Autowired
     private PersonDao personDao;
     @Autowired
+    private FireStationDao fireStationDao;
+    @Autowired
     private DateHelper dateHelper;
 
     private final JMapper<Person, PersonEntity> personEntityToPersonMapper = new JMapper<>(Person.class, PersonEntity.class);
 
     private final int majorityAge = 18;
 
-    public List<Person> getPersonsByStation(int stationNumber) {
+    public List<Person> getPersonsByStation(Long stationNumber) {
         List<PersonEntity> personsByFireStation = personDao.findAllByFireStation(stationNumber);
         return mapPersonsEntityToPersons(personsByFireStation);
     }
 
-    public List<Person> getPersonsByStations(List<Integer> stationNumbers) {
+    public List<Person> getPersonsByStations(List<Long> stationNumbers) {
         List<PersonEntity> personsByFireStation = personDao.findAllByFireStationIn(stationNumbers);
         return mapPersonsEntityToPersons(personsByFireStation);
     }
@@ -97,7 +101,7 @@ public class SnaService {
         return mapPersonsEntityToPersons(personsEntity);
     }
 
-    public Person savePerson(PersonDto personDto) {
+    public Person createPerson(PersonDto personDto) {
         return mapPersonEntityToPerson(personDao.save(mapPersonDtoToPersonEntity(personDto)));
     }
 
@@ -122,6 +126,127 @@ public class SnaService {
         personDao.delete(personEntity);
     }
 
+    public List<FireStation> getAllFireStations() {
+
+        return fireStationDao.findAll().stream()
+                .map(fireStationEntity -> {
+                    FireStation fireStation = new FireStation();
+                    fireStation.setStation(fireStationEntity.getStation());
+                    fireStation.setAddresses(fireStationEntity.getAddresses());
+                    return fireStation;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public FireStation getFireStationByStationAndAddress(Long station, String address) {
+
+        FireStation fireStation = new FireStation();
+
+        FireStationEntity fireStationEntity = fireStationDao.findById(station)
+                .orElseThrow(NoSuchElementException::new);
+
+        if (fireStationEntity.getAddresses().stream().anyMatch(addressEntity -> addressEntity.equals(address))) {
+            fireStation.setStation(station);
+            fireStation.setAddresses(Collections.singletonList(address));
+        } else {
+            throw new NoSuchElementException();
+        }
+
+        return fireStation;
+
+    }
+
+    public void createFireStationMapping(FireStationsDto fireStationsDto) {
+        Optional<FireStationEntity> optionalFireStationEntity = fireStationDao.findById(fireStationsDto.getStation());
+
+        if (optionalFireStationEntity.isPresent()) {
+            // station exists
+            FireStationEntity fireStationEntity = optionalFireStationEntity.get();
+
+            if (fireStationEntity.getAddresses().stream().anyMatch(addressEntity -> addressEntity.equals(fireStationsDto.getAddress()))) {
+                // station exists and address exists
+                throw new EntityExistsException();
+
+            } else {
+                // station exists and address doesn't exist
+                List<String> newAddresses;
+                newAddresses = fireStationEntity.getAddresses();
+                newAddresses.add(fireStationsDto.getAddress());
+                fireStationEntity.setAddresses(newAddresses);
+                fireStationDao.save(fireStationEntity);
+            }
+
+        } else {
+            // station doesn't exist
+            FireStationEntity fireStationEntity = new FireStationEntity();
+            fireStationEntity.setStation(fireStationsDto.getStation());
+            fireStationEntity.setAddresses(Collections.singletonList(fireStationsDto.getAddress()));
+            fireStationDao.save(fireStationEntity);
+        }
+    }
+
+    public void updateFireStationMapping(FireStationsDto fireStationsDto) {
+
+        Optional<FireStationEntity> optionalFireStationEntity = fireStationDao.findByAddresses(fireStationsDto.getAddress());
+
+        if (optionalFireStationEntity.isPresent()) {
+            // address exists
+
+            FireStationEntity fireStationEntity = optionalFireStationEntity.get();
+
+            if (fireStationEntity.getStation().equals(fireStationsDto.getStation())) {
+                // address exists and is already assigned to this station
+                throw new EntityExistsException();
+            } else {
+                // address exists and ...
+                // has to be deleted from the actual fireStation
+                fireStationEntity.setAddresses(fireStationEntity.getAddresses().stream()
+                        .filter(it -> !it.equals(fireStationsDto.getAddress()))
+                        .collect(Collectors.toList()));
+                fireStationDao.save(fireStationEntity);
+
+                //  has to be assigned to the new one (almost same as create)
+                createFireStationMapping(fireStationsDto);
+
+                // fireStation's persons have also to be updated
+                List<PersonEntity> personsByAddress = personDao.findAllByAddress(fireStationsDto.getAddress());
+                personDao.saveAll(personsByAddress.stream()
+                        .peek(it -> it.setFireStation(fireStationsDto.getStation()))
+                        .collect(Collectors.toList()));
+            }
+        } else {
+            // address doesn't exist
+            throw new NoSuchElementException();
+        }
+    }
+
+    public void deleteFireStationMapping(Long station, String address) {
+
+        Optional<FireStationEntity> optionalFireStationEntity = fireStationDao.findByAddresses(address);
+
+        if (optionalFireStationEntity.isPresent()) {
+            // address exists
+
+            FireStationEntity fireStationEntity = optionalFireStationEntity.get();
+
+            if (fireStationEntity.getStation().equals(station)) {
+                // address exists and is assigned to this station
+                List<String> newAddresses = fireStationEntity.getAddresses().stream()
+                        .filter(it -> !it.equals(address))
+                        .collect(Collectors.toList());
+                fireStationEntity.setAddresses(newAddresses);
+                fireStationDao.save(fireStationEntity);
+
+            } else {
+                // address exists but is not assigned to this station
+                throw new NoSuchElementException();
+            }
+
+        } else {
+            //address doesn't exist
+            throw new NoSuchElementException();
+        }
+    }
 
     private List<Person> mapPersonsEntityToPersons(List<PersonEntity> personsEntity) {
         return personsEntity.stream()

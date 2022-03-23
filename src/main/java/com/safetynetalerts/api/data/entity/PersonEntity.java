@@ -32,7 +32,7 @@ public class PersonEntity {
     private String phone;
     @JMap
     private String email;
-    
+
     private LocalDate birthdate;
 
     @ElementCollection
@@ -42,5 +42,5 @@ public class PersonEntity {
     private List<String> allergies;
 
     //TODO : make a list ?
-    private int fireStation;
+    private Long fireStation;
 }

@@ -67,7 +67,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnPopulatedFireStationDto_whenGetFireStationDtoOfPopulatedStation() throws Exception {
-        when(snaService.getPersonsByStation(anyInt())).thenReturn(personList);
+        when(snaService.getPersonsByStation(anyLong())).thenReturn(personList);
         when(snaService.getChildCounter(any())).thenReturn(Long.valueOf(1));
         when(snaService.getAdultCounter(any())).thenReturn(Long.valueOf(1));
 
@@ -97,7 +97,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnEmptyFireStationDto_whenGetFireStationDtoOfEmptyStation() throws Exception {
-        when(snaService.getPersonsByStation(anyInt())).thenReturn(personEmptyList);
+        when(snaService.getPersonsByStation(anyLong())).thenReturn(personEmptyList);
         when(snaService.getChildCounter(any())).thenReturn(Long.valueOf(0));
         when(snaService.getAdultCounter(any())).thenReturn(Long.valueOf(0));
 
@@ -158,7 +158,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnPopulatedPhoneAlertDto_whenGetPhoneAlertDtoOfPopulatedStation() throws Exception {
-        when(snaService.getPersonsByStation(anyInt())).thenReturn(personList);
+        when(snaService.getPersonsByStation(anyLong())).thenReturn(personList);
 
         var expectedJson = "{\n" +
                 "\"phones\": [\n" +
@@ -173,7 +173,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnEmptyPhoneAlertDto_whenGetPhoneAlertDtoOfEmptyStation() throws Exception {
-        when(snaService.getPersonsByStation(anyInt())).thenReturn(personEmptyList);
+        when(snaService.getPersonsByStation(anyLong())).thenReturn(personEmptyList);
 
         var expectedJson = "{\n" +
                 "\"phones\": []\n" +
@@ -482,7 +482,7 @@ public class SnaControllerTest {
     @Test
     public void should_returnPopulatedPersonDto_whenPostNewPersonDto() throws Exception {
         when(snaService.personAlreadyExists(anyString(), anyString())).thenReturn(false);
-        when(snaService.savePerson(any())).thenReturn(p1);
+        when(snaService.createPerson(any())).thenReturn(p1);
 
         var inputJson = "{\n" +
                 "\"firstName\": \"p1FirstName\",\n" +
