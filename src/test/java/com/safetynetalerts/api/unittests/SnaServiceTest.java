@@ -284,7 +284,7 @@ public class SnaServiceTest {
     public void should_throwNoSuchElementException_whenGetPopulatedFireStationByStationAndMismatchAddress() {
         when(fireStationDao.findById(anyLong())).thenReturn(Optional.of(fs1));
 
-        assertThrows(NoSuchElementException.class, () -> snaService.getFireStationByStationAndAddress(1L, "adrX"));
+        assertThrows(NoSuchElementException.class, () -> snaService.getFireStationByStationAndAddress(1L, "adrWrong"));
     }
 
     @Test
@@ -297,22 +297,106 @@ public class SnaServiceTest {
 
         assertThrows(EntityExistsException.class, () -> snaService.createFireStationMapping(fireStationsDto));
     }
-/*
+
     @Test
     public void should_addAddressToFireStation_whenCreateFireStationMappingOfExistingFireStationAndNewAddress() {
         when(fireStationDao.findById(1L)).thenReturn(Optional.of(fs1));
 
         FireStationsDto fireStationsDto = new FireStationsDto();
         fireStationsDto.setStation(1L);
-        fireStationsDto.setAddress("adrX");
+        fireStationsDto.setAddress("adrAdd");
 
         snaService.createFireStationMapping(fireStationsDto);
 
-        verify(fireStationDao, times(1)).save(fs1);
+        verify(fireStationDao, times(1)).save(argThat(it -> {
+            assertThat(it.getAddresses().get(2)).isEqualTo("adrAdd");
+            return true;
+        }));
+    }
+
+    @Test
+    public void should_createNewFireStation_whenCreateFireStationMappingOfNewFireStation() {
+        when(fireStationDao.findById(1L)).thenReturn(Optional.empty());
+
+        FireStationsDto fireStationsDto = new FireStationsDto();
+        fireStationsDto.setStation(1L);
+        fireStationsDto.setAddress("adrNew");
+
+        snaService.createFireStationMapping(fireStationsDto);
+
+        verify(fireStationDao, times(1)).save(argThat(it -> {
+            assertThat(it.getAddresses().get(0)).isEqualTo("adrNew");
+            return true;
+        }));
 
     }
 
- */
+    @Test
+    public void should_throwEntityExistsException_whenUpdateExistingFireStationMapping() {
+        when(fireStationDao.findByAddresses(anyString())).thenReturn(Optional.of(fs1));
 
+        FireStationsDto fireStationsDto = new FireStationsDto();
+        fireStationsDto.setStation(1L);
+        fireStationsDto.setAddress("adr1");
+
+        assertThrows(EntityExistsException.class, () -> snaService.updateFireStationMapping(fireStationsDto));
+    }
+
+    @Test
+    public void should_updateFireStationsAndPersons_whenUpdateFireStationMappingOfExistingAddressOnAnotherFireStation() {
+        FireStationEntity fsUpdate = new FireStationEntity();
+        fsUpdate.setStation(3L);
+        fsUpdate.setAddresses(Arrays.asList("adr5", "adr6"));
+        when(fireStationDao.findByAddresses(anyString())).thenReturn(Optional.of(fsUpdate));
+
+        FireStationsDto fireStationsDto = new FireStationsDto();
+        fireStationsDto.setStation(4L);
+        fireStationsDto.setAddress("adr5");
+
+        snaService.updateFireStationMapping(fireStationsDto);
+
+        verify(fireStationDao, times(2)).save(any(FireStationEntity.class));
+        verify(personDao, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    public void should_throwNoSuchElementException_whenUpdateFireStationMappingOfNonExistingAddress() {
+        when(fireStationDao.findByAddresses(anyString())).thenReturn(Optional.empty());
+
+        FireStationsDto fireStationsDto = new FireStationsDto();
+        fireStationsDto.setStation(0L);
+        fireStationsDto.setAddress("adrWrong");
+
+        assertThrows(NoSuchElementException.class, () -> snaService.updateFireStationMapping(fireStationsDto));
+    }
+
+    @Test
+    public void should_deleteFireStationMapping_whenDeleteExistingFireStationMapping() {
+        FireStationEntity fsDelete = new FireStationEntity();
+        fsDelete.setStation(5L);
+        fsDelete.setAddresses(Arrays.asList("adr7", "adr8"));
+        when(fireStationDao.findByAddresses(anyString())).thenReturn(Optional.of(fsDelete));
+
+        snaService.deleteFireStationMapping(5L, "adr7");
+
+        verify(fireStationDao, times(1)).save(any(FireStationEntity.class));
+    }
+
+    @Test
+    public void should_throwNoSuchElementException_whenDeleteFireStationMappingOfExistingAddressOnAnotherFireStation() {
+        FireStationEntity fsDelete = new FireStationEntity();
+        fsDelete.setStation(5L);
+        fsDelete.setAddresses(Arrays.asList("adr7", "adr8"));
+        when(fireStationDao.findByAddresses(anyString())).thenReturn(Optional.of(fsDelete));
+
+        assertThrows(NoSuchElementException.class, () -> snaService.deleteFireStationMapping(6L, "adr8"));
+    }
+
+    @Test
+    public void should_throwNoSuchElementException_whenDeleteNewFireStationMapping() {
+        when(fireStationDao.findByAddresses(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> snaService.deleteFireStationMapping(6L, "adr8"));
+    }
 
 }

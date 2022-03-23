@@ -169,8 +169,7 @@ public class SnaService {
 
             } else {
                 // station exists and address doesn't exist
-                List<String> newAddresses;
-                newAddresses = fireStationEntity.getAddresses();
+                List<String> newAddresses = new ArrayList<>(fireStationEntity.getAddresses());
                 newAddresses.add(fireStationsDto.getAddress());
                 fireStationEntity.setAddresses(newAddresses);
                 fireStationDao.save(fireStationEntity);
