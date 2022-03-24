@@ -1,4 +1,4 @@
-package com.safetynetalerts.api.data.input.model;
+package com.safetynetalerts.api.input.model;
 
 import lombok.Getter;
 import lombok.Setter;

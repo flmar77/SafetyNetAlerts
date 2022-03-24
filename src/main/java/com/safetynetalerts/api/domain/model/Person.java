@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.List;
 
-//TODO : @EqualsAndHashCode génère du code non couvert... mais sans lui, pas de comparaison possible de person :(
+//TODO : @EqualsAndHashCode à remplacer par equals maison
 
 @Getter
 @Setter

@@ -10,4 +10,6 @@ class SafetyNetAlertsApplicationIT {
     void contextLoads() {
     }
 
+    //TODO : add IT ?
+
 }

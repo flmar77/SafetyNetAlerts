@@ -44,4 +44,11 @@ public class PersonEntity {
     private List<String> allergies;
 
     private Long fireStation;
+
+    //TODO : use real relation
+    /*
+    @ManyToOne
+    private FireStationEntity fireStation;
+
+     */
 }

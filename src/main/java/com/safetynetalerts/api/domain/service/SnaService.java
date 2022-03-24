@@ -20,6 +20,9 @@ import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
 
+//TODO : à découper en firestationService & personService ?
+//TODO : essayer de remonter les exceptions en début de méthodes
+
 @Service
 public class SnaService {
 
@@ -205,6 +208,7 @@ public class SnaService {
         }
     }
 
+    //TODO : 2 saves sur un contexte non secure
     public void updateFireStationMapping(FireStationsDto fireStationsDto) {
 
         Optional<FireStationEntity> optionalFireStationEntity = fireStationRepo.findByAddresses(fireStationsDto.getAddress());

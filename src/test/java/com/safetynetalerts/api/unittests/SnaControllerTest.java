@@ -198,8 +198,7 @@ public class SnaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));
     }
-
-    // TODO : test OK après ajout du firstPerson???
+    
     @Test
     public void should_returnPopulatedFireDto_whenGetFireDtoOfPopulatedAddress() throws Exception {
         when(snaService.getPersonsByAddress(anyString())).thenReturn(personList);
@@ -208,6 +207,7 @@ public class SnaControllerTest {
         var expectedJson = "{\n" +
                 "\"firePersons\": [\n" +
                 "{\n" +
+                "\"firstName\": \"p1FirstName\",\n" +
                 "\"lastName\": \"p1LastName\",\n" +
                 "\"phone\": \"p1Phone\",\n" +
                 "\"age\": 18,\n" +

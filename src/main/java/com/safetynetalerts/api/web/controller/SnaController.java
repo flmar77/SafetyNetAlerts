@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+//TODO : à découper !!!
+
 @Slf4j
 @RestController
 public class SnaController {
@@ -193,6 +195,7 @@ public class SnaController {
                     .body(errorMessage);
         }
 
+        // TODO : use exception
         if (snaService.personAlreadyExists(personDto.getFirstName(), personDto.getLastName())) {
             String errorMessage = "error while posting PersonDto because of existing person with firstName=" + personDto.getFirstName() + " & lastName=" + personDto.getLastName();
             log.error(errorMessage);

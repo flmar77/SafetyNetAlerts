@@ -13,6 +13,8 @@ import java.util.List;
 @Entity
 public class FireStationEntity {
 
+    //TODO : use ID auto-généré
+
     @Id
     private Long station;
 

@@ -1,6 +1,6 @@
 package com.safetynetalerts.api.helper;
 
-import com.safetynetalerts.api.data.input.service.InputService;
+import com.safetynetalerts.api.input.service.InputService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
