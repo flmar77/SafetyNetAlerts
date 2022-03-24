@@ -301,7 +301,7 @@ public class SnaControllerTest {
                 "]\n" +
                 "}";
 
-        mockMvc.perform(get("/stations?stationNumbers=1,2"))
+        mockMvc.perform(get("/flood/stations?stationNumbers=1,2"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));
     }
@@ -314,7 +314,7 @@ public class SnaControllerTest {
                 "\"personsByAddress\": []\n" +
                 "}";
 
-        mockMvc.perform(get("/stations?stationNumbers=1"))
+        mockMvc.perform(get("/flood/stations?stationNumbers=1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));
     }

@@ -103,7 +103,7 @@ public class SnaController {
         return fireDto;
     }
 
-    @GetMapping("/stations")
+    @GetMapping("/flood/stations")
     public StationsDto getStationsDto(@RequestParam List<Long> stationNumbers) {
         log.info("request to get StationsDto of stations : {}", stationNumbers);
 
