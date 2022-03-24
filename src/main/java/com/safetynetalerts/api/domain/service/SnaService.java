@@ -9,6 +9,7 @@ import com.safetynetalerts.api.domain.model.FireStation;
 import com.safetynetalerts.api.domain.model.Person;
 import com.safetynetalerts.api.helper.DateHelper;
 import com.safetynetalerts.api.web.dto.FireStationsDto;
+import com.safetynetalerts.api.web.dto.MedicalRecordsDto;
 import com.safetynetalerts.api.web.dto.PersonDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -105,7 +106,7 @@ public class SnaService {
         return mapPersonEntityToPerson(personDao.save(mapPersonDtoToPersonEntity(personDto)));
     }
 
-    public Person updatePerson(String firstName, String lastName, PersonDto personDto) {
+    public Person updatePersonWithoutMedicalRecords(String firstName, String lastName, PersonDto personDto) {
         PersonEntity personEntity = personDao.findByFirstNameAndLastName(firstName, lastName)
                 .orElseThrow(NoSuchElementException::new);
 
@@ -117,6 +118,26 @@ public class SnaService {
         personEntity.setBirthdate(personDto.getBirthdate());
 
         return mapPersonEntityToPerson(personDao.save(personEntity));
+    }
+
+    public Person updatePersonMedicalRecords(String firstName, String lastName, MedicalRecordsDto medicalRecordsDto) {
+        PersonEntity personEntity = personDao.findByFirstNameAndLastName(firstName, lastName)
+                .orElseThrow(NoSuchElementException::new);
+
+        personEntity.setMedications(medicalRecordsDto.getMedications());
+        personEntity.setAllergies(medicalRecordsDto.getAllergies());
+
+        return mapPersonEntityToPerson(personDao.save(personEntity));
+    }
+
+    public void deletePersonMedicalRecords(String firstName, String lastName) {
+        MedicalRecordsDto emptyMedicalRecords = new MedicalRecordsDto();
+        emptyMedicalRecords.setFirstName(firstName);
+        emptyMedicalRecords.setLastName(lastName);
+        emptyMedicalRecords.setMedications(new ArrayList<>());
+        emptyMedicalRecords.setAllergies(new ArrayList<>());
+
+        Person person = updatePersonMedicalRecords(firstName, lastName, emptyMedicalRecords);
     }
 
     public void deletePerson(String firstName, String lastName) {
@@ -272,7 +293,9 @@ public class SnaService {
         JMapper<PersonEntity, PersonDto> personDtoToEntityMapper = new JMapper<>(PersonEntity.class, PersonDto.class);
         PersonEntity personEntityToSave = personDtoToEntityMapper.getDestination(personDto);
         personEntityToSave.setBirthdate(personDto.getBirthdate());
+        personEntityToSave.setFireStation(0L);
         return personEntityToSave;
     }
+
 
 }

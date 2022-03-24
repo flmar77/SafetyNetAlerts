@@ -10,6 +10,7 @@ import com.safetynetalerts.api.domain.model.Person;
 import com.safetynetalerts.api.domain.service.SnaService;
 import com.safetynetalerts.api.helper.DateHelper;
 import com.safetynetalerts.api.web.dto.FireStationsDto;
+import com.safetynetalerts.api.web.dto.MedicalRecordsDto;
 import com.safetynetalerts.api.web.dto.PersonDto;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -226,14 +227,14 @@ public class SnaServiceTest {
         when(personDao.save(any())).thenReturn(pe1);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
-        assertThat(snaService.updatePerson(pd1.getFirstName(), pd1.getLastName(), pd1)).isEqualTo(p1);
+        assertThat(snaService.updatePersonWithoutMedicalRecords(pd1.getFirstName(), pd1.getLastName(), pd1)).isEqualTo(p1);
     }
 
     @Test
     public void should_throwNoSuchElementException_whenUpdateNonExistingPerson() {
         when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> snaService.updatePerson(anyString(), anyString(), pd1));
+        assertThrows(NoSuchElementException.class, () -> snaService.updatePersonWithoutMedicalRecords(anyString(), anyString(), pd1));
     }
 
     @Test
@@ -397,6 +398,59 @@ public class SnaServiceTest {
         when(fireStationDao.findByAddresses(anyString())).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> snaService.deleteFireStationMapping(6L, "adr8"));
+    }
+
+    @Test
+    public void should_updatePersonMedicalRecords_whenUpdateExistingPersonMedicalRecords() {
+        PersonEntity peTestMedical = new PersonEntity();
+        peTestMedical.setFirstName("peFirstName");
+        peTestMedical.setLastName("peLastName");
+        peTestMedical.setAddress("p1Address");
+        peTestMedical.setPhone("p1Phone");
+        peTestMedical.setBirthdate(LocalDate.of(2002, 1, 1));
+        peTestMedical.setMedications(Arrays.asList("p1Med1:1mg", "p1Med2:2mg"));
+        peTestMedical.setAllergies(Arrays.asList("p1All1", "p1All2"));
+        peTestMedical.setFireStation(1L);
+        MedicalRecordsDto mrTestMedical = new MedicalRecordsDto();
+        mrTestMedical.setFirstName("peFirstName");
+        mrTestMedical.setLastName("peLastName");
+        mrTestMedical.setMedications(Arrays.asList("a", "b"));
+        mrTestMedical.setAllergies(Collections.singletonList("c"));
+
+        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(peTestMedical));
+        when(personDao.save(any(PersonEntity.class))).thenReturn(peTestMedical);
+        when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
+
+        snaService.updatePersonMedicalRecords("peFirstName", "peLastName", mrTestMedical);
+
+        verify(personDao, times(1)).save(argThat(it -> {
+            assertThat(it.getMedications().get(0)).isEqualTo("a");
+            return true;
+        }));
+    }
+
+    @Test
+    public void should_updatePersonWithEmptyMedicalRecords_whenDeleteExistingPersonMedicalRecords() {
+        PersonEntity peTestMedical = new PersonEntity();
+        peTestMedical.setFirstName("peFirstName");
+        peTestMedical.setLastName("peLastName");
+        peTestMedical.setAddress("p1Address");
+        peTestMedical.setPhone("p1Phone");
+        peTestMedical.setBirthdate(LocalDate.of(2002, 1, 1));
+        peTestMedical.setMedications(Arrays.asList("p1Med1:1mg", "p1Med2:2mg"));
+        peTestMedical.setAllergies(Arrays.asList("p1All1", "p1All2"));
+        peTestMedical.setFireStation(1L);
+
+        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(peTestMedical));
+        when(personDao.save(any(PersonEntity.class))).thenReturn(peTestMedical);
+        when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
+
+        snaService.deletePersonMedicalRecords("peFirstName", "peLastName");
+
+        verify(personDao, times(1)).save(argThat(it -> {
+            assertThat(it.getMedications()).isEqualTo(Collections.emptyList());
+            return true;
+        }));
     }
 
 }

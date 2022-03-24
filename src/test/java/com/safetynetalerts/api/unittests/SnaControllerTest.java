@@ -5,6 +5,7 @@ import com.safetynetalerts.api.domain.model.Person;
 import com.safetynetalerts.api.domain.service.SnaService;
 import com.safetynetalerts.api.web.controller.SnaController;
 import com.safetynetalerts.api.web.dto.FireStationsDto;
+import com.safetynetalerts.api.web.dto.MedicalRecordsDto;
 import lombok.var;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -561,7 +562,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnPopulatedPersonDto_whenPutExistingPersonDto() throws Exception {
-        when(snaService.updatePerson(anyString(), anyString(), any())).thenReturn(p1);
+        when(snaService.updatePersonWithoutMedicalRecords(anyString(), anyString(), any())).thenReturn(p1);
 
         var inputJson = "{\n" +
                 "\"firstName\": \"p1FirstName\",\n" +
@@ -604,7 +605,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnNotFound_whenPutNewPersonDto() throws Exception {
-        when(snaService.updatePerson(anyString(), anyString(), any())).thenThrow(NoSuchElementException.class);
+        when(snaService.updatePersonWithoutMedicalRecords(anyString(), anyString(), any())).thenThrow(NoSuchElementException.class);
 
         var inputJson = "{\n" +
                 "\"lastName\": \"p1LastName\",\n" +
@@ -821,6 +822,157 @@ public class SnaControllerTest {
         doThrow(new NoSuchElementException()).when(snaService).deleteFireStationMapping(anyLong(), anyString());
 
         mockMvc.perform(delete("/firestations/2&adr3"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void should_returnPopulatedMedicalRecordsDto_whenGetMedicalRecords() throws Exception {
+        when(snaService.getAllPersons()).thenReturn(personList);
+
+        var expectedJson = "[\n" +
+                "{\n" +
+                "\"firstName\": \"p1FirstName\",\n" +
+                "\"lastName\": \"p1LastName\",\n" +
+                "\"medications\": [\n" +
+                "\"p1Med1:1mg\",\n" +
+                "\"p1Med2:2mg\"\n" +
+                "],\n" +
+                "\"allergies\": [\n" +
+                "\"p1All1\",\n" +
+                "\"p1All2\"\n" +
+                "]\n" +
+                "},\n" +
+                "{\n" +
+                "\"firstName\": \"p2FirstName\",\n" +
+                "\"lastName\": \"p2LastName\",\n" +
+                "\"medications\": [\n" +
+                "\"p2Med1:1mg\",\n" +
+                "\"p2Med2:2mg\"\n" +
+                "],\n" +
+                "\"allergies\": [\n" +
+                "\"p2All1\",\n" +
+                "\"p2All2\"\n" +
+                "]\n" +
+                "}\n" +
+                "]";
+
+        mockMvc.perform(get("/medicalRecords"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+    }
+
+    @Test
+    public void should_returnPopulatedMedicalRecordDto_whenGetMedicalRecord() throws Exception {
+        when(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(p1));
+
+        var expectedJson = "[\n" +
+                "{\n" +
+                "\"firstName\": \"p1FirstName\",\n" +
+                "\"lastName\": \"p1LastName\",\n" +
+                "\"medications\": [\n" +
+                "\"p1Med1:1mg\",\n" +
+                "\"p1Med2:2mg\"\n" +
+                "],\n" +
+                "\"allergies\": [\n" +
+                "\"p1All1\",\n" +
+                "\"p1All2\"\n" +
+                "]\n" +
+                "}\n" +
+                "]";
+
+        mockMvc.perform(get("/medicalRecords/x&y"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+    }
+
+    @Test
+    public void should_returnUnprocessableEntity_whenPutWrongMedicalRecordsDto() throws Exception {
+
+        var inputJson = "{\n" +
+                "\"firstName\": \"p1FirstName\",\n" +
+                "\"lastName\": \"\",\n" +
+                "\"medications\": [\n" +
+                "\"p1Med1:1mg\",\n" +
+                "\"p1Med2:2mg\"\n" +
+                "],\n" +
+                "\"allergies\": [\n" +
+                "\"p1All1\",\n" +
+                "\"p1All2\"\n" +
+                "]\n" +
+                "}";
+
+        mockMvc.perform(put("/medicalRecords/x&")
+                        .content(inputJson)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void should_returnOk_whenPutRightMedicalRecordsDto() throws Exception {
+        when(snaService.updatePersonMedicalRecords(anyString(), anyString(), any(MedicalRecordsDto.class))).thenReturn(p1);
+
+        var inputJson = "{\n" +
+                "\"firstName\": \"p1FirstName\",\n" +
+                "\"lastName\": \"p1LastName\",\n" +
+                "\"medications\": [\n" +
+                "\"p1Med1:1mg\",\n" +
+                "\"p1Med2:2mg\"\n" +
+                "],\n" +
+                "\"allergies\": [\n" +
+                "\"p1All1\",\n" +
+                "\"p1All2\"\n" +
+                "]\n" +
+                "}";
+
+        mockMvc.perform(put("/medicalRecords/x&y")
+                        .content(inputJson)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void should_returnNotFound_whenPutNewMedicalRecordsDto() throws Exception {
+        doThrow(new NoSuchElementException()).when(snaService).updatePersonMedicalRecords(anyString(), anyString(), any(MedicalRecordsDto.class));
+
+        var inputJson = "{\n" +
+                "\"firstName\": \"p1FirstName\",\n" +
+                "\"lastName\": \"p1LastName\",\n" +
+                "\"medications\": [\n" +
+                "\"p1Med1:1mg\",\n" +
+                "\"p1Med2:2mg\"\n" +
+                "],\n" +
+                "\"allergies\": [\n" +
+                "\"p1All1\",\n" +
+                "\"p1All2\"\n" +
+                "]\n" +
+                "}";
+
+        mockMvc.perform(put("/medicalRecords/x&y")
+                        .content(inputJson)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void should_returnUnprocessableEntity_whenDeleteWrongMedicalRecordsDto() throws Exception {
+        mockMvc.perform(delete("/medicalRecords/x&"))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void should_returnOk_whenDeleteRightMedicalRecordsDto() throws Exception {
+        mockMvc.perform(delete("/medicalRecords/x&y"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void should_returnNotFound_whenDeleteNewMedicalRecordsDto() throws Exception {
+        doThrow(new NoSuchElementException()).when(snaService).deletePersonMedicalRecords(anyString(), anyString());
+
+        mockMvc.perform(delete("/medicalRecords/x&y"))
                 .andExpect(status().isNotFound());
     }
 
