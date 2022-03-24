@@ -218,14 +218,14 @@ public class SnaService {
                 // address exists and is already assigned to this station
                 throw new EntityExistsException();
             } else {
-                // address exists and ...
-                // has to be deleted from the actual fireStation
+                // address exists so ...
+                // address has to be deleted from the actual fireStation
                 fireStationEntity.setAddresses(fireStationEntity.getAddresses().stream()
                         .filter(it -> !it.equals(fireStationsDto.getAddress()))
                         .collect(Collectors.toList()));
                 fireStationRepo.save(fireStationEntity);
 
-                //  has to be assigned to the new one (almost same as create)
+                // and has to be assigned to the new one (almost same as create)
                 createFireStationMapping(fireStationsDto);
 
                 // fireStation's persons have also to be updated
@@ -250,12 +250,19 @@ public class SnaService {
             FireStationEntity fireStationEntity = optionalFireStationEntity.get();
 
             if (fireStationEntity.getStation().equals(station)) {
-                // address exists and is assigned to this station
+                // address exists and is assigned to this station so...
+                // address has to be deleted from this station
                 List<String> newAddresses = fireStationEntity.getAddresses().stream()
                         .filter(it -> !it.equals(address))
                         .collect(Collectors.toList());
                 fireStationEntity.setAddresses(newAddresses);
                 fireStationRepo.save(fireStationEntity);
+
+                // and fireStation's persons has to be initialized
+                List<PersonEntity> personsByAddress = personRepo.findAllByAddress(address);
+                personRepo.saveAll(personsByAddress.stream()
+                        .peek(it -> it.setFireStation(0L))
+                        .collect(Collectors.toList()));
 
             } else {
                 // address exists but is not assigned to this station
