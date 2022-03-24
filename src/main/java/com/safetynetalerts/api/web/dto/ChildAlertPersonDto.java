@@ -1,9 +1,11 @@
 package com.safetynetalerts.api.web.dto;
 
 import com.googlecode.jmapper.annotations.JGlobalMap;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @JGlobalMap
 public class ChildAlertPersonDto {
     private String firstName;

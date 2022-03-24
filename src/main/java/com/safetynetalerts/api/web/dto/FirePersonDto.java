@@ -1,11 +1,13 @@
 package com.safetynetalerts.api.web.dto;
 
 import com.googlecode.jmapper.annotations.JGlobalMap;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @JGlobalMap
 public class FirePersonDto {
     private String lastName;

@@ -1,10 +1,10 @@
 package com.safetynetalerts.api.domain.service;
 
 import com.googlecode.jmapper.JMapper;
-import com.safetynetalerts.api.data.dao.FireStationRepo;
-import com.safetynetalerts.api.data.dao.PersonRepo;
 import com.safetynetalerts.api.data.entity.FireStationEntity;
 import com.safetynetalerts.api.data.entity.PersonEntity;
+import com.safetynetalerts.api.data.repository.FireStationRepo;
+import com.safetynetalerts.api.data.repository.PersonRepo;
 import com.safetynetalerts.api.domain.model.FireStation;
 import com.safetynetalerts.api.domain.model.Person;
 import com.safetynetalerts.api.helper.DateHelper;

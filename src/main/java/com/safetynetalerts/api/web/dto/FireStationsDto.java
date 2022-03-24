@@ -1,8 +1,10 @@
 package com.safetynetalerts.api.web.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class FireStationsDto {
     private Long station;
     private String address;

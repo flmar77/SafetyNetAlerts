@@ -1,10 +1,12 @@
 package com.safetynetalerts.api.web.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class FireDto {
     private List<FirePersonDto> firePersons;
     private int fireStation;

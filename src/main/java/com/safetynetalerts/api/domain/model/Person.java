@@ -1,12 +1,18 @@
 package com.safetynetalerts.api.domain.model;
 
 import com.googlecode.jmapper.annotations.JMap;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
+//TODO : @EqualsAndHashCode génère du code non couvert... mais sans lui, pas de comparaison possible de person :(
+
+@Getter
+@Setter
+@EqualsAndHashCode
 public class Person {
 
     @JMap

@@ -1,4 +1,4 @@
-package com.safetynetalerts.api.data.dao;
+package com.safetynetalerts.api.data.repository;
 
 import com.safetynetalerts.api.data.entity.FireStationEntity;
 import org.springframework.data.repository.CrudRepository;
