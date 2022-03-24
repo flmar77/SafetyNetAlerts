@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FireStationsDto {
-    private Long station;
+    private int station;
     private String address;
 }

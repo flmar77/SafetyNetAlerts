@@ -8,6 +8,6 @@ import java.util.List;
 @Getter
 @Setter
 public class FireStation {
-    private Long station;
+    private int station;
     private List<String> addresses;
 }

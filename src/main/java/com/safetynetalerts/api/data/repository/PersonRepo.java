@@ -9,9 +9,9 @@ import java.util.Optional;
 
 @Repository
 public interface PersonRepo extends CrudRepository<PersonEntity, Long> {
-    List<PersonEntity> findAllByFireStation(Long fireStation);
+    List<PersonEntity> findAllByFireStation(int fireStation);
 
-    List<PersonEntity> findAllByFireStationIn(List<Long> stationNumbers);
+    List<PersonEntity> findAllByFireStationIn(List<Integer> stationNumbers);
 
     List<PersonEntity> findAllByAddress(String Address);
 

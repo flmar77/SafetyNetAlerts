@@ -27,7 +27,7 @@ public class SnaController {
     private SnaService snaService;
 
     @GetMapping("/firestation")
-    public FireStationDto getFireStationDto(@RequestParam Long stationNumber) {
+    public FireStationDto getFireStationDto(@RequestParam int stationNumber) {
         log.info("request to get FireStationDto of station : {}", stationNumber);
 
         FireStationDto fireStationDto = new FireStationDto();
@@ -69,7 +69,7 @@ public class SnaController {
     }
 
     @GetMapping("/phoneAlert")
-    public PhoneAlertDto getPhoneAlertDto(@RequestParam Long firestation_number) {
+    public PhoneAlertDto getPhoneAlertDto(@RequestParam int firestation_number) {
         log.info("request to get PhoneAlertDto of station : {}", firestation_number);
 
         PhoneAlertDto phoneAlertDto = new PhoneAlertDto();
@@ -106,7 +106,7 @@ public class SnaController {
     }
 
     @GetMapping("/flood/stations")
-    public StationsDto getStationsDto(@RequestParam List<Long> stationNumbers) {
+    public StationsDto getStationsDto(@RequestParam List<Integer> stationNumbers) {
         log.info("request to get StationsDto of stations : {}", stationNumbers);
 
         StationsDto stationsDto = new StationsDto();
@@ -283,12 +283,12 @@ public class SnaController {
     }
 
     @GetMapping("/firestations/{station}&{address}")
-    public ResponseEntity<?> getFireStationsDto(@PathVariable Long station, @PathVariable String address) {
+    public ResponseEntity<?> getFireStationsDto(@PathVariable int station, @PathVariable String address) {
         log.info("request to get FireStationsDto of station={} & address={}", station, address);
 
         FireStationsDto fireStationsDto = new FireStationsDto();
 
-        if (station == null || station == 0
+        if (station == 0
                 || address == null || address.equals("")) {
             String errorMessage = "error while getting FireStationsDto because of wrong station=" + station + " and/or address=" + address;
             log.error(errorMessage);
@@ -320,7 +320,7 @@ public class SnaController {
     public ResponseEntity<?> createFireStationsDto(@RequestBody FireStationsDto fireStationsDto) {
         log.info("request to post FireStationsDto : {}", fireStationsDto);
 
-        if (fireStationsDto.getStation() == null || fireStationsDto.getStation() == 0
+        if (fireStationsDto.getStation() == 0
                 || fireStationsDto.getAddress() == null || fireStationsDto.getAddress().equals("")) {
             String errorMessage = "error while posting FireStationsDto because of wrong input : " + fireStationsDto;
             log.error(errorMessage);
@@ -345,10 +345,10 @@ public class SnaController {
     }
 
     @PutMapping("/firestations/{station}&{address}")
-    public ResponseEntity<?> updateFireStationsDto(@PathVariable Long station, @PathVariable String address, @RequestBody FireStationsDto fireStationsDto) {
+    public ResponseEntity<?> updateFireStationsDto(@PathVariable int station, @PathVariable String address, @RequestBody FireStationsDto fireStationsDto) {
         log.info("request to put FireStationsDto : {}", fireStationsDto);
 
-        if (station == null || station == 0
+        if (station == 0
                 || address == null || address.equals("")) {
             String errorMessage = "error while putting FireStationsDto because of wrong station=" + station + " and/or address" + address;
             log.error(errorMessage);
@@ -378,10 +378,10 @@ public class SnaController {
     }
 
     @DeleteMapping("/firestations/{station}&{address}")
-    public ResponseEntity<?> deleteFireStationsDto(@PathVariable Long station, @PathVariable String address) {
+    public ResponseEntity<?> deleteFireStationsDto(@PathVariable int station, @PathVariable String address) {
         log.info("request to delete mapping of address={} with station={}", address, station);
 
-        if (station == null || station == 0
+        if (station == 0
                 || address == null || address.equals("")) {
             String errorMessage = "error while deleting FireStationsDto because of wrong station=" + station + " and/or address=" + address;
             log.error(errorMessage);

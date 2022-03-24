@@ -37,12 +37,12 @@ public class SnaService {
 
     private final int majorityAge = 18;
 
-    public List<Person> getPersonsByStation(Long stationNumber) {
+    public List<Person> getPersonsByStation(int stationNumber) {
         List<PersonEntity> personsByFireStation = personRepo.findAllByFireStation(stationNumber);
         return mapPersonsEntityToPersons(personsByFireStation);
     }
 
-    public List<Person> getPersonsByStations(List<Long> stationNumbers) {
+    public List<Person> getPersonsByStations(List<Integer> stationNumbers) {
         List<PersonEntity> personsByFireStation = personRepo.findAllByFireStationIn(stationNumbers);
         return mapPersonsEntityToPersons(personsByFireStation);
     }
@@ -162,11 +162,11 @@ public class SnaService {
                 .collect(Collectors.toList());
     }
 
-    public FireStation getFireStationByStationAndAddress(Long station, String address) {
+    public FireStation getFireStationByStationAndAddress(int station, String address) {
 
         FireStation fireStation = new FireStation();
 
-        FireStationEntity fireStationEntity = fireStationRepo.findById(station)
+        FireStationEntity fireStationEntity = fireStationRepo.findByStation(station)
                 .orElseThrow(NoSuchElementException::new);
 
         if (fireStationEntity.getAddresses().stream().anyMatch(addressEntity -> addressEntity.equals(address))) {
@@ -181,7 +181,7 @@ public class SnaService {
     }
 
     public void createFireStationMapping(FireStationsDto fireStationsDto) {
-        Optional<FireStationEntity> optionalFireStationEntity = fireStationRepo.findById(fireStationsDto.getStation());
+        Optional<FireStationEntity> optionalFireStationEntity = fireStationRepo.findByStation(fireStationsDto.getStation());
 
         if (optionalFireStationEntity.isPresent()) {
             // station exists
@@ -218,7 +218,7 @@ public class SnaService {
 
             FireStationEntity fireStationEntity = optionalFireStationEntity.get();
 
-            if (fireStationEntity.getStation().equals(fireStationsDto.getStation())) {
+            if (fireStationEntity.getStation() == (fireStationsDto.getStation())) {
                 // address exists and is already assigned to this station
                 throw new EntityExistsException();
             } else {
@@ -244,7 +244,7 @@ public class SnaService {
         }
     }
 
-    public void deleteFireStationMapping(Long station, String address) {
+    public void deleteFireStationMapping(int station, String address) {
 
         Optional<FireStationEntity> optionalFireStationEntity = fireStationRepo.findByAddresses(address);
 
@@ -253,7 +253,7 @@ public class SnaService {
 
             FireStationEntity fireStationEntity = optionalFireStationEntity.get();
 
-            if (fireStationEntity.getStation().equals(station)) {
+            if (fireStationEntity.getStation() == (station)) {
                 // address exists and is assigned to this station so...
                 // address has to be deleted from this station
                 List<String> newAddresses = fireStationEntity.getAddresses().stream()
@@ -265,7 +265,7 @@ public class SnaService {
                 // and fireStation's persons has to be initialized
                 List<PersonEntity> personsByAddress = personRepo.findAllByAddress(address);
                 personRepo.saveAll(personsByAddress.stream()
-                        .peek(it -> it.setFireStation(0L))
+                        .peek(it -> it.setFireStation(0))
                         .collect(Collectors.toList()));
 
             } else {
@@ -304,7 +304,7 @@ public class SnaService {
         JMapper<PersonEntity, PersonDto> personDtoToEntityMapper = new JMapper<>(PersonEntity.class, PersonDto.class);
         PersonEntity personEntityToSave = personDtoToEntityMapper.getDestination(personDto);
         personEntityToSave.setBirthdate(personDto.getBirthdate());
-        personEntityToSave.setFireStation(0L);
+        personEntityToSave.setFireStation(0);
         return personEntityToSave;
     }
 

@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.util.List;
 
@@ -13,10 +14,11 @@ import java.util.List;
 @Entity
 public class FireStationEntity {
 
-    //TODO : use ID auto-généré
-
     @Id
-    private Long station;
+    @GeneratedValue
+    private Long id;
+
+    private int station;
 
     @ElementCollection
     private List<String> addresses;

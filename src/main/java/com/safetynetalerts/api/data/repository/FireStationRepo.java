@@ -12,4 +12,6 @@ public interface FireStationRepo extends CrudRepository<FireStationEntity, Long>
     List<FireStationEntity> findAll();
 
     Optional<FireStationEntity> findByAddresses(String address);
+
+    Optional<FireStationEntity> findByStation(int station);
 }

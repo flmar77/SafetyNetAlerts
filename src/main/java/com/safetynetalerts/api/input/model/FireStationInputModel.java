@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class FireStationInputModel {
     private String address;
-    private Long station;
+    private int station;
 }

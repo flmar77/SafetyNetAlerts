@@ -43,7 +43,7 @@ public class PersonEntity {
     @ElementCollection
     private List<String> allergies;
 
-    private Long fireStation;
+    private int fireStation;
 
     //TODO : use real relation
     /*

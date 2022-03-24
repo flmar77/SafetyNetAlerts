@@ -72,17 +72,17 @@ public class SnaControllerTest {
         personList = Arrays.asList(p1, p2);
 
         fs1 = new FireStation();
-        fs1.setStation(1L);
+        fs1.setStation(1);
         fs1.setAddresses(Arrays.asList("adr1", "adr2"));
         fs2 = new FireStation();
-        fs2.setStation(2L);
+        fs2.setStation(2);
         fs2.setAddresses(Collections.singletonList("adr3"));
         fireStationList = Arrays.asList(fs1, fs2);
     }
 
     @Test
     public void should_returnPopulatedFireStationDto_whenGetFireStationDtoOfPopulatedStation() throws Exception {
-        when(snaService.getPersonsByStation(anyLong())).thenReturn(personList);
+        when(snaService.getPersonsByStation(anyInt())).thenReturn(personList);
         when(snaService.getChildCounter(any())).thenReturn(Long.valueOf(1));
         when(snaService.getAdultCounter(any())).thenReturn(Long.valueOf(1));
 
@@ -112,7 +112,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnEmptyFireStationDto_whenGetFireStationDtoOfEmptyStation() throws Exception {
-        when(snaService.getPersonsByStation(anyLong())).thenReturn(personEmptyList);
+        when(snaService.getPersonsByStation(anyInt())).thenReturn(personEmptyList);
         when(snaService.getChildCounter(any())).thenReturn(Long.valueOf(0));
         when(snaService.getAdultCounter(any())).thenReturn(Long.valueOf(0));
 
@@ -173,7 +173,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnPopulatedPhoneAlertDto_whenGetPhoneAlertDtoOfPopulatedStation() throws Exception {
-        when(snaService.getPersonsByStation(anyLong())).thenReturn(personList);
+        when(snaService.getPersonsByStation(anyInt())).thenReturn(personList);
 
         var expectedJson = "{\n" +
                 "\"phones\": [\n" +
@@ -188,7 +188,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnEmptyPhoneAlertDto_whenGetPhoneAlertDtoOfEmptyStation() throws Exception {
-        when(snaService.getPersonsByStation(anyLong())).thenReturn(personEmptyList);
+        when(snaService.getPersonsByStation(anyInt())).thenReturn(personEmptyList);
 
         var expectedJson = "{\n" +
                 "\"phones\": []\n" +
@@ -198,7 +198,7 @@ public class SnaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));
     }
-    
+
     @Test
     public void should_returnPopulatedFireDto_whenGetFireDtoOfPopulatedAddress() throws Exception {
         when(snaService.getPersonsByAddress(anyString())).thenReturn(personList);
@@ -259,7 +259,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnPopulatedStationsDto_whenGetStationsDtoOfPopulatedStation() throws Exception {
-        when(snaService.getPersonsByStations(anyList())).thenReturn(personList);
+        when(snaService.getPersonsByStations(any())).thenReturn(personList);
 
         var expectedJson = "{\n" +
                 "\"personsByAddress\": [\n" +
@@ -309,7 +309,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnEmptyStationsDto_whenGetStationsDtoOfEmptyStation() throws Exception {
-        when(snaService.getPersonsByStations(anyList())).thenReturn(personEmptyList);
+        when(snaService.getPersonsByStations(any())).thenReturn(personEmptyList);
 
         var expectedJson = "{\n" +
                 "\"personsByAddress\": []\n" +
@@ -677,7 +677,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnPopulatedFireStationDto_whenGetFireStationsDto() throws Exception {
-        when(snaService.getFireStationByStationAndAddress(anyLong(), anyString())).thenReturn(fs2);
+        when(snaService.getFireStationByStationAndAddress(anyInt(), anyString())).thenReturn(fs2);
 
         var expectedJson = "{\n" +
                 "\"station\": 2,\n" +
@@ -691,7 +691,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnNotFound_whenGetEmptyFireStationsDto() throws Exception {
-        doThrow(new NoSuchElementException()).when(snaService).getFireStationByStationAndAddress(anyLong(), anyString());
+        doThrow(new NoSuchElementException()).when(snaService).getFireStationByStationAndAddress(anyInt(), anyString());
 
         mockMvc.perform(get("/firestations/2&adr3"))
                 .andExpect(status().isNotFound());
@@ -820,7 +820,7 @@ public class SnaControllerTest {
 
     @Test
     public void should_returnNotFound_whenDeleteNewFireStationsDto() throws Exception {
-        doThrow(new NoSuchElementException()).when(snaService).deleteFireStationMapping(anyLong(), anyString());
+        doThrow(new NoSuchElementException()).when(snaService).deleteFireStationMapping(anyInt(), anyString());
 
         mockMvc.perform(delete("/firestations/2&adr3"))
                 .andExpect(status().isNotFound());
