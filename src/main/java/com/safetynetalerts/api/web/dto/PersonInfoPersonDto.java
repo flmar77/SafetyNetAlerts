@@ -10,6 +10,7 @@ import java.util.List;
 @Setter
 @JGlobalMap
 public class PersonInfoPersonDto {
+    private String firstName;
     private String lastName;
     private String address;
     private int age;
