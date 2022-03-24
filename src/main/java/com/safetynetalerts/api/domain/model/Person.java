@@ -29,7 +29,6 @@ public class Person {
     private List<String> medications;
     @JMap
     private List<String> allergies;
-    //TODO : make a list ?
     @JMap
     private int fireStation;
 

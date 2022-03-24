@@ -41,6 +41,5 @@ public class PersonEntity {
     @ElementCollection
     private List<String> allergies;
 
-    //TODO : make a list ?
     private Long fireStation;
 }

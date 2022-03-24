@@ -2,17 +2,18 @@ package com.safetynetalerts.api.data.input.service;
 
 import com.google.gson.Gson;
 import com.googlecode.jmapper.JMapper;
-import com.safetynetalerts.api.data.dao.FireStationDao;
-import com.safetynetalerts.api.data.dao.PersonDao;
 import com.safetynetalerts.api.data.entity.FireStationEntity;
 import com.safetynetalerts.api.data.entity.PersonEntity;
 import com.safetynetalerts.api.data.input.model.AggregatedInputModel;
 import com.safetynetalerts.api.data.input.model.FireStationInputModel;
 import com.safetynetalerts.api.data.input.model.MedicalRecordInputModel;
 import com.safetynetalerts.api.data.input.model.PersonInputModel;
+import com.safetynetalerts.api.domain.service.SnaService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
@@ -20,33 +21,32 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class InputService {
 
     @Autowired
-    private PersonDao personDao;
-    @Autowired
-    private FireStationDao fireStationDao;
+    private SnaService snaService;
 
-    public void loadInMemoryDbFromInput() {
-        // TODO : essayer @Resource ?
+    public void loadInMemoryDbFromInput() throws IOException {
         InputStream inputStream = getClass().getResourceAsStream("/static/input.json");
-        //TODO : try/catch
-        assert inputStream != null;
+
+        if (inputStream == null) {
+            throw new IOException("input file not found");
+        }
+
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 
         AggregatedInputModel aggregatedInputModel = new Gson().fromJson(inputStreamReader, AggregatedInputModel.class);
 
         List<FireStationEntity> fireStationEntities = extractFireStation(aggregatedInputModel.getFireStationInputModels());
-        // TODO : move to domain service
-        fireStationDao.saveAll(fireStationEntities);
+        snaService.saveAllFireStationEntities(fireStationEntities);
 
         List<PersonEntity> personEntities = extractPersonEntityFromPersonInputModel(aggregatedInputModel.getPersonInputModels());
         // TODO : passer en void
         personEntities = enrichPersonEntityFromMedicalRecordInputModel(personEntities, aggregatedInputModel.getMedicalRecordInputModels());
         personEntities = enrichPersonEntityFromFireStationEntity(personEntities, fireStationEntities);
-        // TODO : move to domain service
-        personDao.saveAll(personEntities);
+        snaService.saveAllPersonEntities(personEntities);
 
     }
 
@@ -90,15 +90,12 @@ public class InputService {
                 .collect(Collectors.toList());
     }
 
-    //TODO : as above
     private List<PersonEntity> enrichPersonEntityFromFireStationEntity(List<PersonEntity> personEntities, List<FireStationEntity> fireStationEntities) {
         return personEntities.stream()
-                .peek(personEntity -> {
-                    FireStationEntity fireStationEntity = fireStationEntities.stream()
-                            .filter(fireStationEntity1 -> fireStationEntity1.getAddresses().contains(personEntity.getAddress()))
-                            .findFirst().get();
-                    personEntity.setFireStation(fireStationEntity.getStation());
-                })
+                .peek(personEntity -> fireStationEntities.stream()
+                        .filter(fireStationEntity1 -> fireStationEntity1.getAddresses().contains(personEntity.getAddress()))
+                        .findFirst()
+                        .ifPresent(fireStationEntity -> personEntity.setFireStation(fireStationEntity.getStation())))
                 .collect(Collectors.toList());
     }
 

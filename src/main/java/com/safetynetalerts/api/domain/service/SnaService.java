@@ -1,8 +1,8 @@
 package com.safetynetalerts.api.domain.service;
 
 import com.googlecode.jmapper.JMapper;
-import com.safetynetalerts.api.data.dao.FireStationDao;
-import com.safetynetalerts.api.data.dao.PersonDao;
+import com.safetynetalerts.api.data.dao.FireStationRepo;
+import com.safetynetalerts.api.data.dao.PersonRepo;
 import com.safetynetalerts.api.data.entity.FireStationEntity;
 import com.safetynetalerts.api.data.entity.PersonEntity;
 import com.safetynetalerts.api.domain.model.FireStation;
@@ -24,9 +24,9 @@ import java.util.stream.Collectors;
 public class SnaService {
 
     @Autowired
-    private PersonDao personDao;
+    private PersonRepo personRepo;
     @Autowired
-    private FireStationDao fireStationDao;
+    private FireStationRepo fireStationRepo;
     @Autowired
     private DateHelper dateHelper;
 
@@ -35,27 +35,27 @@ public class SnaService {
     private final int majorityAge = 18;
 
     public List<Person> getPersonsByStation(Long stationNumber) {
-        List<PersonEntity> personsByFireStation = personDao.findAllByFireStation(stationNumber);
+        List<PersonEntity> personsByFireStation = personRepo.findAllByFireStation(stationNumber);
         return mapPersonsEntityToPersons(personsByFireStation);
     }
 
     public List<Person> getPersonsByStations(List<Long> stationNumbers) {
-        List<PersonEntity> personsByFireStation = personDao.findAllByFireStationIn(stationNumbers);
+        List<PersonEntity> personsByFireStation = personRepo.findAllByFireStationIn(stationNumbers);
         return mapPersonsEntityToPersons(personsByFireStation);
     }
 
     public List<Person> getPersonsByAddress(String address) {
-        List<PersonEntity> personsByAddress = personDao.findAllByAddress(address);
+        List<PersonEntity> personsByAddress = personRepo.findAllByAddress(address);
         return mapPersonsEntityToPersons(personsByAddress);
     }
 
     public List<Person> getPersonsByFirstNameAndLastName(String firstName, String lastName) {
-        List<PersonEntity> personsByFirstNameAndLastName = personDao.findAllByFirstNameAndLastName(firstName, lastName);
+        List<PersonEntity> personsByFirstNameAndLastName = personRepo.findAllByFirstNameAndLastName(firstName, lastName);
         return mapPersonsEntityToPersons(personsByFirstNameAndLastName);
     }
 
     public List<Person> getPersonsByCity(String city) {
-        List<PersonEntity> personsByCity = personDao.findAllByCity(city);
+        List<PersonEntity> personsByCity = personRepo.findAllByCity(city);
         return mapPersonsEntityToPersons(personsByCity);
     }
 
@@ -92,22 +92,22 @@ public class SnaService {
     }
 
     public boolean personAlreadyExists(String firstName, String lastName) {
-        Optional<PersonEntity> optionalPersonEntity = personDao.findByFirstNameAndLastName(firstName, lastName);
+        Optional<PersonEntity> optionalPersonEntity = personRepo.findByFirstNameAndLastName(firstName, lastName);
         return optionalPersonEntity.isPresent();
     }
 
     public List<Person> getAllPersons() {
         List<PersonEntity> personsEntity = new ArrayList<>();
-        personDao.findAll().forEach(personsEntity::add);
+        personRepo.findAll().forEach(personsEntity::add);
         return mapPersonsEntityToPersons(personsEntity);
     }
 
     public Person createPerson(PersonDto personDto) {
-        return mapPersonEntityToPerson(personDao.save(mapPersonDtoToPersonEntity(personDto)));
+        return mapPersonEntityToPerson(personRepo.save(mapPersonDtoToPersonEntity(personDto)));
     }
 
     public Person updatePersonWithoutMedicalRecords(String firstName, String lastName, PersonDto personDto) {
-        PersonEntity personEntity = personDao.findByFirstNameAndLastName(firstName, lastName)
+        PersonEntity personEntity = personRepo.findByFirstNameAndLastName(firstName, lastName)
                 .orElseThrow(NoSuchElementException::new);
 
         personEntity.setAddress(personDto.getAddress());
@@ -117,17 +117,17 @@ public class SnaService {
         personEntity.setEmail(personDto.getEmail());
         personEntity.setBirthdate(personDto.getBirthdate());
 
-        return mapPersonEntityToPerson(personDao.save(personEntity));
+        return mapPersonEntityToPerson(personRepo.save(personEntity));
     }
 
     public Person updatePersonMedicalRecords(String firstName, String lastName, MedicalRecordsDto medicalRecordsDto) {
-        PersonEntity personEntity = personDao.findByFirstNameAndLastName(firstName, lastName)
+        PersonEntity personEntity = personRepo.findByFirstNameAndLastName(firstName, lastName)
                 .orElseThrow(NoSuchElementException::new);
 
         personEntity.setMedications(medicalRecordsDto.getMedications());
         personEntity.setAllergies(medicalRecordsDto.getAllergies());
 
-        return mapPersonEntityToPerson(personDao.save(personEntity));
+        return mapPersonEntityToPerson(personRepo.save(personEntity));
     }
 
     public void deletePersonMedicalRecords(String firstName, String lastName) {
@@ -141,15 +141,15 @@ public class SnaService {
     }
 
     public void deletePerson(String firstName, String lastName) {
-        PersonEntity personEntity = personDao.findByFirstNameAndLastName(firstName, lastName)
+        PersonEntity personEntity = personRepo.findByFirstNameAndLastName(firstName, lastName)
                 .orElseThrow(NoSuchElementException::new);
 
-        personDao.delete(personEntity);
+        personRepo.delete(personEntity);
     }
 
     public List<FireStation> getAllFireStations() {
 
-        return fireStationDao.findAll().stream()
+        return fireStationRepo.findAll().stream()
                 .map(fireStationEntity -> {
                     FireStation fireStation = new FireStation();
                     fireStation.setStation(fireStationEntity.getStation());
@@ -163,7 +163,7 @@ public class SnaService {
 
         FireStation fireStation = new FireStation();
 
-        FireStationEntity fireStationEntity = fireStationDao.findById(station)
+        FireStationEntity fireStationEntity = fireStationRepo.findById(station)
                 .orElseThrow(NoSuchElementException::new);
 
         if (fireStationEntity.getAddresses().stream().anyMatch(addressEntity -> addressEntity.equals(address))) {
@@ -178,7 +178,7 @@ public class SnaService {
     }
 
     public void createFireStationMapping(FireStationsDto fireStationsDto) {
-        Optional<FireStationEntity> optionalFireStationEntity = fireStationDao.findById(fireStationsDto.getStation());
+        Optional<FireStationEntity> optionalFireStationEntity = fireStationRepo.findById(fireStationsDto.getStation());
 
         if (optionalFireStationEntity.isPresent()) {
             // station exists
@@ -193,7 +193,7 @@ public class SnaService {
                 List<String> newAddresses = new ArrayList<>(fireStationEntity.getAddresses());
                 newAddresses.add(fireStationsDto.getAddress());
                 fireStationEntity.setAddresses(newAddresses);
-                fireStationDao.save(fireStationEntity);
+                fireStationRepo.save(fireStationEntity);
             }
 
         } else {
@@ -201,13 +201,13 @@ public class SnaService {
             FireStationEntity fireStationEntity = new FireStationEntity();
             fireStationEntity.setStation(fireStationsDto.getStation());
             fireStationEntity.setAddresses(Collections.singletonList(fireStationsDto.getAddress()));
-            fireStationDao.save(fireStationEntity);
+            fireStationRepo.save(fireStationEntity);
         }
     }
 
     public void updateFireStationMapping(FireStationsDto fireStationsDto) {
 
-        Optional<FireStationEntity> optionalFireStationEntity = fireStationDao.findByAddresses(fireStationsDto.getAddress());
+        Optional<FireStationEntity> optionalFireStationEntity = fireStationRepo.findByAddresses(fireStationsDto.getAddress());
 
         if (optionalFireStationEntity.isPresent()) {
             // address exists
@@ -223,14 +223,14 @@ public class SnaService {
                 fireStationEntity.setAddresses(fireStationEntity.getAddresses().stream()
                         .filter(it -> !it.equals(fireStationsDto.getAddress()))
                         .collect(Collectors.toList()));
-                fireStationDao.save(fireStationEntity);
+                fireStationRepo.save(fireStationEntity);
 
                 //  has to be assigned to the new one (almost same as create)
                 createFireStationMapping(fireStationsDto);
 
                 // fireStation's persons have also to be updated
-                List<PersonEntity> personsByAddress = personDao.findAllByAddress(fireStationsDto.getAddress());
-                personDao.saveAll(personsByAddress.stream()
+                List<PersonEntity> personsByAddress = personRepo.findAllByAddress(fireStationsDto.getAddress());
+                personRepo.saveAll(personsByAddress.stream()
                         .peek(it -> it.setFireStation(fireStationsDto.getStation()))
                         .collect(Collectors.toList()));
             }
@@ -242,7 +242,7 @@ public class SnaService {
 
     public void deleteFireStationMapping(Long station, String address) {
 
-        Optional<FireStationEntity> optionalFireStationEntity = fireStationDao.findByAddresses(address);
+        Optional<FireStationEntity> optionalFireStationEntity = fireStationRepo.findByAddresses(address);
 
         if (optionalFireStationEntity.isPresent()) {
             // address exists
@@ -255,7 +255,7 @@ public class SnaService {
                         .filter(it -> !it.equals(address))
                         .collect(Collectors.toList());
                 fireStationEntity.setAddresses(newAddresses);
-                fireStationDao.save(fireStationEntity);
+                fireStationRepo.save(fireStationEntity);
 
             } else {
                 // address exists but is not assigned to this station
@@ -297,5 +297,11 @@ public class SnaService {
         return personEntityToSave;
     }
 
+    public void saveAllFireStationEntities(List<FireStationEntity> fireStationEntities) {
+        fireStationRepo.saveAll(fireStationEntities);
+    }
 
+    public void saveAllPersonEntities(List<PersonEntity> personEntities) {
+        personRepo.saveAll(personEntities);
+    }
 }

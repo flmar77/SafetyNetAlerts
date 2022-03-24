@@ -1,8 +1,8 @@
 package com.safetynetalerts.api.unittests;
 
 import com.googlecode.jmapper.JMapper;
-import com.safetynetalerts.api.data.dao.FireStationDao;
-import com.safetynetalerts.api.data.dao.PersonDao;
+import com.safetynetalerts.api.data.dao.FireStationRepo;
+import com.safetynetalerts.api.data.dao.PersonRepo;
 import com.safetynetalerts.api.data.entity.FireStationEntity;
 import com.safetynetalerts.api.data.entity.PersonEntity;
 import com.safetynetalerts.api.domain.model.FireStation;
@@ -35,10 +35,10 @@ public class SnaServiceTest {
     private SnaService snaService;
 
     @Mock
-    private PersonDao personDao;
+    private PersonRepo personRepo;
 
     @Mock
-    private FireStationDao fireStationDao;
+    private FireStationRepo fireStationRepo;
 
     @Mock
     private DateHelper dateHelper;
@@ -108,7 +108,7 @@ public class SnaServiceTest {
 
     @Test
     public void should_returnPopulatedPersonList_whenGetPersonsByPopulatedStation() {
-        when(personDao.findAllByFireStation(anyLong())).thenReturn(personEntityList);
+        when(personRepo.findAllByFireStation(anyLong())).thenReturn(personEntityList);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
         assertThat(snaService.getPersonsByStation(anyLong())).isEqualTo(personList);
@@ -116,14 +116,14 @@ public class SnaServiceTest {
 
     @Test
     public void should_returnEmptyPersonList_whenGetPersonsByWrongStation() {
-        when(personDao.findAllByFireStation(anyLong())).thenReturn(personEntityEmptyList);
+        when(personRepo.findAllByFireStation(anyLong())).thenReturn(personEntityEmptyList);
 
         assertThat(snaService.getPersonsByStation(anyLong())).isEqualTo(personEmptyList);
     }
 
     @Test
     public void should_returnPopulatedPersonList_whenGetPersonsByPopulatedStations() {
-        when(personDao.findAllByFireStationIn(anyList())).thenReturn(personEntityList);
+        when(personRepo.findAllByFireStationIn(anyList())).thenReturn(personEntityList);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
         assertThat(snaService.getPersonsByStations(anyList())).isEqualTo(personList);
@@ -132,7 +132,7 @@ public class SnaServiceTest {
 
     @Test
     public void should_returnPopulatedPersonList_whenGetPersonsByPopulatedAddress() {
-        when(personDao.findAllByAddress(anyString())).thenReturn(personEntityList);
+        when(personRepo.findAllByAddress(anyString())).thenReturn(personEntityList);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
         assertThat(snaService.getPersonsByAddress(anyString())).isEqualTo(personList);
@@ -140,7 +140,7 @@ public class SnaServiceTest {
 
     @Test
     public void should_returnEmptyPersonList_whenGetPersonsByWrongAddress() {
-        when(personDao.findAllByAddress(anyString())).thenReturn(personEntityEmptyList);
+        when(personRepo.findAllByAddress(anyString())).thenReturn(personEntityEmptyList);
 
         assertThat(snaService.getPersonsByAddress(anyString())).isEqualTo(personEmptyList);
     }
@@ -177,7 +177,7 @@ public class SnaServiceTest {
 
     @Test
     public void should_returnPopulatedPersonList_whenGetPersonsByFirstNameAndLastNameOfExistingPerson() {
-        when(personDao.findAllByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(pe1));
+        when(personRepo.findAllByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(pe1));
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
         assertThat(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).isEqualTo(Collections.singletonList(p1));
@@ -185,7 +185,7 @@ public class SnaServiceTest {
 
     @Test
     public void should_returnPopulatedPersonList_whenGetPersonsByCityOfPopulatedCity() {
-        when(personDao.findAllByCity(anyString())).thenReturn(personEntityList);
+        when(personRepo.findAllByCity(anyString())).thenReturn(personEntityList);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
         assertThat(snaService.getPersonsByCity(anyString())).isEqualTo(personList);
@@ -193,21 +193,21 @@ public class SnaServiceTest {
 
     @Test
     public void should_returnTrue_whenPersonAlreadyExists() {
-        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(pe1));
+        when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(pe1));
 
         assertThat(snaService.personAlreadyExists(anyString(), anyString())).isTrue();
     }
 
     @Test
     public void should_returnFalse_whenPersonNotAlreadyExists() {
-        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
+        when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
 
         assertThat(snaService.personAlreadyExists(anyString(), anyString())).isFalse();
     }
 
     @Test
     public void should_returnPopulatedPersonList_whenGetAllPersons() {
-        when(personDao.findAll()).thenReturn(personEntityList);
+        when(personRepo.findAll()).thenReturn(personEntityList);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
         assertThat(snaService.getAllPersons()).isEqualTo(personList);
@@ -215,7 +215,7 @@ public class SnaServiceTest {
 
     @Test
     public void should_returnValidPerson_whenSavePerson() {
-        when(personDao.save(any())).thenReturn(pe1);
+        when(personRepo.save(any())).thenReturn(pe1);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
         assertThat(snaService.createPerson(pd1)).isEqualTo(p1);
@@ -223,8 +223,8 @@ public class SnaServiceTest {
 
     @Test
     public void should_returnValidPerson_whenUpdateExistingPerson() {
-        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(pe1));
-        when(personDao.save(any())).thenReturn(pe1);
+        when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(pe1));
+        when(personRepo.save(any())).thenReturn(pe1);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
         assertThat(snaService.updatePersonWithoutMedicalRecords(pd1.getFirstName(), pd1.getLastName(), pd1)).isEqualTo(p1);
@@ -232,30 +232,30 @@ public class SnaServiceTest {
 
     @Test
     public void should_throwNoSuchElementException_whenUpdateNonExistingPerson() {
-        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
+        when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> snaService.updatePersonWithoutMedicalRecords(anyString(), anyString(), pd1));
     }
 
     @Test
     public void should_delete_whenDeleteExistingPerson() {
-        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(pe1));
+        when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(pe1));
 
         snaService.deletePerson(anyString(), anyString());
 
-        verify(personDao, times(1)).delete(pe1);
+        verify(personRepo, times(1)).delete(pe1);
     }
 
     @Test
     public void should_throwNoSuchElementException_whenDeleteNonExistingPerson() {
-        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
+        when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> snaService.deletePerson(anyString(), anyString()));
     }
 
     @Test
     public void should_returnPopulatedFireStations_whenGetAllFireStations() {
-        when(fireStationDao.findAll()).thenReturn(Arrays.asList(fs1, fs2));
+        when(fireStationRepo.findAll()).thenReturn(Arrays.asList(fs1, fs2));
 
         List<FireStation> fireStationList = snaService.getAllFireStations();
 
@@ -266,14 +266,14 @@ public class SnaServiceTest {
 
     @Test
     public void should_throwNoSuchElementException_whenGetEmptyFireStationByStationAndAddress() {
-        when(fireStationDao.findById(anyLong())).thenReturn(Optional.empty());
+        when(fireStationRepo.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> snaService.getFireStationByStationAndAddress(1L, anyString()));
     }
 
     @Test
     public void should_returnPopulatedFireStation_whenGetPopulatedFireStationByStationAndAddress() {
-        when(fireStationDao.findById(anyLong())).thenReturn(Optional.of(fs1));
+        when(fireStationRepo.findById(anyLong())).thenReturn(Optional.of(fs1));
 
         FireStation fireStation = snaService.getFireStationByStationAndAddress(1L, "adr1");
 
@@ -283,14 +283,14 @@ public class SnaServiceTest {
 
     @Test
     public void should_throwNoSuchElementException_whenGetPopulatedFireStationByStationAndMismatchAddress() {
-        when(fireStationDao.findById(anyLong())).thenReturn(Optional.of(fs1));
+        when(fireStationRepo.findById(anyLong())).thenReturn(Optional.of(fs1));
 
         assertThrows(NoSuchElementException.class, () -> snaService.getFireStationByStationAndAddress(1L, "adrWrong"));
     }
 
     @Test
     public void should_throwEntityExistsException_whenCreateExistingFireStationMapping() {
-        when(fireStationDao.findById(1L)).thenReturn(Optional.of(fs1));
+        when(fireStationRepo.findById(1L)).thenReturn(Optional.of(fs1));
 
         FireStationsDto fireStationsDto = new FireStationsDto();
         fireStationsDto.setStation(1L);
@@ -301,7 +301,7 @@ public class SnaServiceTest {
 
     @Test
     public void should_addAddressToFireStation_whenCreateFireStationMappingOfExistingFireStationAndNewAddress() {
-        when(fireStationDao.findById(1L)).thenReturn(Optional.of(fs1));
+        when(fireStationRepo.findById(1L)).thenReturn(Optional.of(fs1));
 
         FireStationsDto fireStationsDto = new FireStationsDto();
         fireStationsDto.setStation(1L);
@@ -309,7 +309,7 @@ public class SnaServiceTest {
 
         snaService.createFireStationMapping(fireStationsDto);
 
-        verify(fireStationDao, times(1)).save(argThat(it -> {
+        verify(fireStationRepo, times(1)).save(argThat(it -> {
             assertThat(it.getAddresses().get(2)).isEqualTo("adrAdd");
             return true;
         }));
@@ -317,7 +317,7 @@ public class SnaServiceTest {
 
     @Test
     public void should_createNewFireStation_whenCreateFireStationMappingOfNewFireStation() {
-        when(fireStationDao.findById(1L)).thenReturn(Optional.empty());
+        when(fireStationRepo.findById(1L)).thenReturn(Optional.empty());
 
         FireStationsDto fireStationsDto = new FireStationsDto();
         fireStationsDto.setStation(1L);
@@ -325,7 +325,7 @@ public class SnaServiceTest {
 
         snaService.createFireStationMapping(fireStationsDto);
 
-        verify(fireStationDao, times(1)).save(argThat(it -> {
+        verify(fireStationRepo, times(1)).save(argThat(it -> {
             assertThat(it.getAddresses().get(0)).isEqualTo("adrNew");
             return true;
         }));
@@ -334,7 +334,7 @@ public class SnaServiceTest {
 
     @Test
     public void should_throwEntityExistsException_whenUpdateExistingFireStationMapping() {
-        when(fireStationDao.findByAddresses(anyString())).thenReturn(Optional.of(fs1));
+        when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.of(fs1));
 
         FireStationsDto fireStationsDto = new FireStationsDto();
         fireStationsDto.setStation(1L);
@@ -348,7 +348,7 @@ public class SnaServiceTest {
         FireStationEntity fsUpdate = new FireStationEntity();
         fsUpdate.setStation(3L);
         fsUpdate.setAddresses(Arrays.asList("adr5", "adr6"));
-        when(fireStationDao.findByAddresses(anyString())).thenReturn(Optional.of(fsUpdate));
+        when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.of(fsUpdate));
 
         FireStationsDto fireStationsDto = new FireStationsDto();
         fireStationsDto.setStation(4L);
@@ -356,13 +356,13 @@ public class SnaServiceTest {
 
         snaService.updateFireStationMapping(fireStationsDto);
 
-        verify(fireStationDao, times(2)).save(any(FireStationEntity.class));
-        verify(personDao, times(1)).saveAll(anyList());
+        verify(fireStationRepo, times(2)).save(any(FireStationEntity.class));
+        verify(personRepo, times(1)).saveAll(anyList());
     }
 
     @Test
     public void should_throwNoSuchElementException_whenUpdateFireStationMappingOfNonExistingAddress() {
-        when(fireStationDao.findByAddresses(anyString())).thenReturn(Optional.empty());
+        when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.empty());
 
         FireStationsDto fireStationsDto = new FireStationsDto();
         fireStationsDto.setStation(0L);
@@ -376,11 +376,11 @@ public class SnaServiceTest {
         FireStationEntity fsDelete = new FireStationEntity();
         fsDelete.setStation(5L);
         fsDelete.setAddresses(Arrays.asList("adr7", "adr8"));
-        when(fireStationDao.findByAddresses(anyString())).thenReturn(Optional.of(fsDelete));
+        when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.of(fsDelete));
 
         snaService.deleteFireStationMapping(5L, "adr7");
 
-        verify(fireStationDao, times(1)).save(any(FireStationEntity.class));
+        verify(fireStationRepo, times(1)).save(any(FireStationEntity.class));
     }
 
     @Test
@@ -388,14 +388,14 @@ public class SnaServiceTest {
         FireStationEntity fsDelete = new FireStationEntity();
         fsDelete.setStation(5L);
         fsDelete.setAddresses(Arrays.asList("adr7", "adr8"));
-        when(fireStationDao.findByAddresses(anyString())).thenReturn(Optional.of(fsDelete));
+        when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.of(fsDelete));
 
         assertThrows(NoSuchElementException.class, () -> snaService.deleteFireStationMapping(6L, "adr8"));
     }
 
     @Test
     public void should_throwNoSuchElementException_whenDeleteNewFireStationMapping() {
-        when(fireStationDao.findByAddresses(anyString())).thenReturn(Optional.empty());
+        when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> snaService.deleteFireStationMapping(6L, "adr8"));
     }
@@ -417,13 +417,13 @@ public class SnaServiceTest {
         mrTestMedical.setMedications(Arrays.asList("a", "b"));
         mrTestMedical.setAllergies(Collections.singletonList("c"));
 
-        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(peTestMedical));
-        when(personDao.save(any(PersonEntity.class))).thenReturn(peTestMedical);
+        when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(peTestMedical));
+        when(personRepo.save(any(PersonEntity.class))).thenReturn(peTestMedical);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
         snaService.updatePersonMedicalRecords("peFirstName", "peLastName", mrTestMedical);
 
-        verify(personDao, times(1)).save(argThat(it -> {
+        verify(personRepo, times(1)).save(argThat(it -> {
             assertThat(it.getMedications().get(0)).isEqualTo("a");
             return true;
         }));
@@ -441,13 +441,13 @@ public class SnaServiceTest {
         peTestMedical.setAllergies(Arrays.asList("p1All1", "p1All2"));
         peTestMedical.setFireStation(1L);
 
-        when(personDao.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(peTestMedical));
-        when(personDao.save(any(PersonEntity.class))).thenReturn(peTestMedical);
+        when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(peTestMedical));
+        when(personRepo.save(any(PersonEntity.class))).thenReturn(peTestMedical);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
         snaService.deletePersonMedicalRecords("peFirstName", "peLastName");
 
-        verify(personDao, times(1)).save(argThat(it -> {
+        verify(personRepo, times(1)).save(argThat(it -> {
             assertThat(it.getMedications()).isEqualTo(Collections.emptyList());
             return true;
         }));

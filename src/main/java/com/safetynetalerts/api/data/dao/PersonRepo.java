@@ -7,9 +7,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-//TODO rename repo
 @Repository
-public interface PersonDao extends CrudRepository<PersonEntity, Long> {
+public interface PersonRepo extends CrudRepository<PersonEntity, Long> {
     List<PersonEntity> findAllByFireStation(Long fireStation);
 
     List<PersonEntity> findAllByFireStationIn(List<Long> stationNumbers);
