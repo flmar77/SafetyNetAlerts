@@ -1,34 +1,38 @@
-package com.safetynetalerts.api.data.entity;
+package com.safetynetalerts.api.domain.model;
 
+import com.googlecode.jmapper.annotations.JMap;
 import lombok.Data;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@Entity
 public class Person {
 
-    @Id
-    @GeneratedValue
-    private Long id;
-
+    @JMap
     private String firstName;
+    @JMap
     private String lastName;
+    @JMap
     private String address;
+    @JMap
     private String city;
+    @JMap
     private String zip;
+    @JMap
     private String phone;
+    @JMap
     private String email;
+    @JMap
     private LocalDate birthdate;
-
-    @ElementCollection
+    @JMap
     private List<String> medications;
-
-    @ElementCollection
+    @JMap
     private List<String> allergies;
+    //TODO : make a list ?
+    @JMap
+    private int fireStation;
+
+    private int age;
+
 }

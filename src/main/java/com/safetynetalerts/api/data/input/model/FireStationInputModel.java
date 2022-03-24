@@ -1,9 +1,9 @@
-package com.safetynetalerts.api.data.inputmodel;
+package com.safetynetalerts.api.data.input.model;
 
 import lombok.Data;
 
 @Data
 public class FireStationInputModel {
     private String address;
-    private int station;
+    private Long station;
 }
