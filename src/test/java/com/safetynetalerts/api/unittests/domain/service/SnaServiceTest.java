@@ -1,4 +1,4 @@
-package com.safetynetalerts.api.unittests;
+package com.safetynetalerts.api.unittests.domain.service;
 
 import com.googlecode.jmapper.JMapper;
 import com.safetynetalerts.api.data.entity.FireStationEntity;
