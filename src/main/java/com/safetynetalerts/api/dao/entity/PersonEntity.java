@@ -45,10 +45,4 @@ public class PersonEntity {
 
     private int fireStation;
 
-    //TODO : use real relation
-    /*
-    @ManyToOne
-    private FireStationEntity fireStation;
-
-     */
 }
