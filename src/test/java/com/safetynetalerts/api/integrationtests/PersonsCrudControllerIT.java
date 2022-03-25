@@ -1,7 +1,7 @@
 package com.safetynetalerts.api.integrationtests;
 
-import com.safetynetalerts.api.data.entity.PersonEntity;
-import com.safetynetalerts.api.data.repository.PersonRepo;
+import com.safetynetalerts.api.dao.entity.PersonEntity;
+import com.safetynetalerts.api.dao.repository.PersonRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

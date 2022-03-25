@@ -1,10 +1,10 @@
-package com.safetynetalerts.api.unittests.domain.service;
+package com.safetynetalerts.api.unittests.domain;
 
 import com.googlecode.jmapper.JMapper;
-import com.safetynetalerts.api.data.entity.FireStationEntity;
-import com.safetynetalerts.api.data.entity.PersonEntity;
-import com.safetynetalerts.api.data.repository.FireStationRepo;
-import com.safetynetalerts.api.data.repository.PersonRepo;
+import com.safetynetalerts.api.dao.entity.FireStationEntity;
+import com.safetynetalerts.api.dao.entity.PersonEntity;
+import com.safetynetalerts.api.dao.repository.FireStationRepo;
+import com.safetynetalerts.api.dao.repository.PersonRepo;
 import com.safetynetalerts.api.domain.model.FireStation;
 import com.safetynetalerts.api.domain.model.Person;
 import com.safetynetalerts.api.domain.service.SnaService;
@@ -451,6 +451,20 @@ public class SnaServiceTest {
             assertThat(it.getMedications()).isEqualTo(Collections.emptyList());
             return true;
         }));
+    }
+
+    @Test
+    public void should_SaveAll_whenSaveAllFireStationEntities() {
+        snaService.saveAllFireStationEntities(anyList());
+
+        verify(fireStationRepo, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    public void should_SaveAll_whenSaveAllPersonEntities() {
+        snaService.saveAllPersonEntities(anyList());
+
+        verify(personRepo, times(1)).saveAll(anyList());
     }
 
 }

@@ -1,8 +1,8 @@
 package com.safetynetalerts.api.integrationtests;
 
 import com.google.gson.Gson;
-import com.safetynetalerts.api.data.entity.FireStationEntity;
-import com.safetynetalerts.api.data.repository.FireStationRepo;
+import com.safetynetalerts.api.dao.entity.FireStationEntity;
+import com.safetynetalerts.api.dao.repository.FireStationRepo;
 import com.safetynetalerts.api.web.dto.FireStationsDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

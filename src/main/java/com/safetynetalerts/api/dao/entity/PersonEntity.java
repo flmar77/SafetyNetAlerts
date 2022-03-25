@@ -1,4 +1,4 @@
-package com.safetynetalerts.api.data.entity;
+package com.safetynetalerts.api.dao.entity;
 
 import com.googlecode.jmapper.annotations.JMap;
 import lombok.Getter;

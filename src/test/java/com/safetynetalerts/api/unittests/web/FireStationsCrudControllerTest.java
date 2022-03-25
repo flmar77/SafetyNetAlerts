@@ -1,4 +1,4 @@
-package com.safetynetalerts.api.unittests.web.controller;
+package com.safetynetalerts.api.unittests.web;
 
 import com.safetynetalerts.api.domain.model.FireStation;
 import com.safetynetalerts.api.domain.service.SnaService;

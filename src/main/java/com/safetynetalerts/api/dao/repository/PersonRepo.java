@@ -1,6 +1,6 @@
-package com.safetynetalerts.api.data.repository;
+package com.safetynetalerts.api.dao.repository;
 
-import com.safetynetalerts.api.data.entity.PersonEntity;
+import com.safetynetalerts.api.dao.entity.PersonEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

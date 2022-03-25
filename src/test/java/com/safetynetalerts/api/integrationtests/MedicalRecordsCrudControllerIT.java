@@ -1,8 +1,8 @@
 package com.safetynetalerts.api.integrationtests;
 
 import com.google.gson.Gson;
-import com.safetynetalerts.api.data.entity.PersonEntity;
-import com.safetynetalerts.api.data.repository.PersonRepo;
+import com.safetynetalerts.api.dao.entity.PersonEntity;
+import com.safetynetalerts.api.dao.repository.PersonRepo;
 import com.safetynetalerts.api.web.dto.MedicalRecordsDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

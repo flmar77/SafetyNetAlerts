@@ -1,4 +1,4 @@
-package com.safetynetalerts.api.data.entity;
+package com.safetynetalerts.api.dao.entity;
 
 import lombok.Getter;
 import lombok.Setter;

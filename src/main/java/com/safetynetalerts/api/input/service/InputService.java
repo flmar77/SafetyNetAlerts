@@ -2,8 +2,8 @@ package com.safetynetalerts.api.input.service;
 
 import com.google.gson.Gson;
 import com.googlecode.jmapper.JMapper;
-import com.safetynetalerts.api.data.entity.FireStationEntity;
-import com.safetynetalerts.api.data.entity.PersonEntity;
+import com.safetynetalerts.api.dao.entity.FireStationEntity;
+import com.safetynetalerts.api.dao.entity.PersonEntity;
 import com.safetynetalerts.api.domain.service.SnaService;
 import com.safetynetalerts.api.input.model.AggregatedInputModel;
 import com.safetynetalerts.api.input.model.FireStationInputModel;
@@ -20,8 +20,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
-
-//TODO : add test
 
 @Slf4j
 @Service
