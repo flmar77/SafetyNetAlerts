@@ -1,7 +1,8 @@
-package com.safetynetalerts.api.data.entity;
+package com.safetynetalerts.api.dao.entity;
 
 import com.googlecode.jmapper.annotations.JMap;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -10,7 +11,8 @@ import javax.persistence.Id;
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 public class PersonEntity {
 
@@ -41,6 +43,6 @@ public class PersonEntity {
     @ElementCollection
     private List<String> allergies;
 
-    //TODO : make a list ?
-    private Long fireStation;
+    private int fireStation;
+
 }

@@ -1,17 +1,17 @@
-package com.safetynetalerts.api.data.dao;
+package com.safetynetalerts.api.dao.repository;
 
-import com.safetynetalerts.api.data.entity.FireStationEntity;
+import com.safetynetalerts.api.dao.entity.FireStationEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-
-//TODO rename repo
 @Repository
-public interface FireStationDao extends CrudRepository<FireStationEntity, Long> {
+public interface FireStationRepo extends CrudRepository<FireStationEntity, Long> {
     List<FireStationEntity> findAll();
 
     Optional<FireStationEntity> findByAddresses(String address);
+
+    Optional<FireStationEntity> findByStation(int station);
 }

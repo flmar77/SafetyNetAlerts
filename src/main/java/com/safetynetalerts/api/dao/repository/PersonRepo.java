@@ -1,18 +1,17 @@
-package com.safetynetalerts.api.data.dao;
+package com.safetynetalerts.api.dao.repository;
 
-import com.safetynetalerts.api.data.entity.PersonEntity;
+import com.safetynetalerts.api.dao.entity.PersonEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-//TODO rename repo
 @Repository
-public interface PersonDao extends CrudRepository<PersonEntity, Long> {
-    List<PersonEntity> findAllByFireStation(Long fireStation);
+public interface PersonRepo extends CrudRepository<PersonEntity, Long> {
+    List<PersonEntity> findAllByFireStation(int fireStation);
 
-    List<PersonEntity> findAllByFireStationIn(List<Long> stationNumbers);
+    List<PersonEntity> findAllByFireStationIn(List<Integer> stationNumbers);
 
     List<PersonEntity> findAllByAddress(String Address);
 

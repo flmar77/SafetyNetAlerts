@@ -1,6 +1,6 @@
 package com.safetynetalerts.api.helper;
 
-import com.safetynetalerts.api.data.input.service.InputService;
+import com.safetynetalerts.api.input.service.InputService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -8,6 +8,8 @@ import org.springframework.boot.actuate.trace.http.HttpTraceRepository;
 import org.springframework.boot.actuate.trace.http.InMemoryHttpTraceRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.io.IOException;
 
 
 @Slf4j
@@ -21,11 +23,15 @@ public class AppConfiguration implements CommandLineRunner {
     public HttpTraceRepository htttpTraceRepository() {
         return new InMemoryHttpTraceRepository();
     }
-    
+
     @Override
     public void run(String... args) {
-        inputService.loadInMemoryDbFromInput();
-        log.debug("h2 loaded");
+        try {
+            inputService.loadInMemoryDbFromInput();
+            log.debug("h2 loaded");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
     }
 
 }

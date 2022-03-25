@@ -1,11 +1,13 @@
 package com.safetynetalerts.api.web.dto;
 
 import com.googlecode.jmapper.annotations.JGlobalMap;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Setter
 @JGlobalMap
 public class PersonDto {
     private String firstName;

@@ -1,11 +1,13 @@
 package com.safetynetalerts.api.domain.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class FireStation {
-    private Long station;
+    private int station;
     private List<String> addresses;
 }
