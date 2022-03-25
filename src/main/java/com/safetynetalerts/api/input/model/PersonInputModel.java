@@ -1,10 +1,8 @@
 package com.safetynetalerts.api.input.model;
 
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 public class PersonInputModel {
     private String firstName;
     private String lastName;

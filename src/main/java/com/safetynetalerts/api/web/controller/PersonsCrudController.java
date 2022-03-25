@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityExistsException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -50,8 +51,14 @@ public class PersonsCrudController {
                     .status(HttpStatus.UNPROCESSABLE_ENTITY)
                     .body(errorMessage);
         }
-        
-        if (snaService.personAlreadyExists(personDto.getFirstName(), personDto.getLastName())) {
+
+        try {
+            Person person = snaService.createPerson(personDto);
+            JMapper<PersonDto, Person> personToPersonDtoMapper = new JMapper<>(PersonDto.class, Person.class);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(personToPersonDtoMapper.getDestination(person));
+        } catch (EntityExistsException e) {
             String errorMessage = "error while posting PersonDto because of existing person with firstName=" + personDto.getFirstName() + " & lastName=" + personDto.getLastName();
             log.error(errorMessage);
             return ResponseEntity
@@ -59,10 +66,6 @@ public class PersonsCrudController {
                     .body(errorMessage);
         }
 
-        JMapper<PersonDto, Person> personToPersonDtoMapper = new JMapper<>(PersonDto.class, Person.class);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(personToPersonDtoMapper.getDestination(snaService.createPerson(personDto)));
     }
 
     @PutMapping("/persons/{firstName}&{lastName}")

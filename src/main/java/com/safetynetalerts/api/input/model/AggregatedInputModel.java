@@ -2,12 +2,10 @@ package com.safetynetalerts.api.input.model;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.List;
 
 @Getter
-@Setter
 public class AggregatedInputModel {
     @SerializedName("persons")
     private List<PersonInputModel> personInputModels;

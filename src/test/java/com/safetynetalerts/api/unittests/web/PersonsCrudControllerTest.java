@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.persistence.EntityExistsException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
@@ -125,7 +126,6 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnPopulatedPersonDto_whenPostNewPersonDto() throws Exception {
-        when(snaService.personAlreadyExists(anyString(), anyString())).thenReturn(false);
         when(snaService.createPerson(any())).thenReturn(p1);
 
         var inputJson = "{\n" +
@@ -168,8 +168,8 @@ public class PersonsCrudControllerTest {
     }
 
     @Test
-    public void should_returnUnprocessableEntity_whenPostExistingPersonDto() throws Exception {
-        when(snaService.personAlreadyExists(anyString(), anyString())).thenReturn(true);
+    public void should_returnUnprocessableEntity_whenPostExistingPerson() throws Exception {
+        when(snaService.createPerson(any())).thenThrow(EntityExistsException.class);
 
         var inputJson = "{\n" +
                 "\"firstName\": \"p1FirstName\",\n" +

@@ -192,20 +192,6 @@ public class SnaServiceTest {
     }
 
     @Test
-    public void should_returnTrue_whenPersonAlreadyExists() {
-        when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(pe1));
-
-        assertThat(snaService.personAlreadyExists(anyString(), anyString())).isTrue();
-    }
-
-    @Test
-    public void should_returnFalse_whenPersonNotAlreadyExists() {
-        when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
-
-        assertThat(snaService.personAlreadyExists(anyString(), anyString())).isFalse();
-    }
-
-    @Test
     public void should_returnPopulatedPersonList_whenGetAllPersons() {
         when(personRepo.findAll()).thenReturn(personEntityList);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
@@ -214,11 +200,19 @@ public class SnaServiceTest {
     }
 
     @Test
-    public void should_returnValidPerson_whenSavePerson() {
+    public void should_returnValidPerson_whenCreateNewPerson() {
+        when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
         when(personRepo.save(any())).thenReturn(pe1);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
         assertThat(snaService.createPerson(pd1)).isEqualTo(p1);
+    }
+
+    @Test
+    public void should_throwEntityExistsException_whenCreateExistingPerson() {
+        when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(pe1));
+
+        assertThrows(EntityExistsException.class, () -> snaService.createPerson(pd1));
     }
 
     @Test

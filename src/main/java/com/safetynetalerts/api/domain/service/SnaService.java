@@ -91,11 +91,6 @@ public class SnaService {
         }
     }
 
-    public boolean personAlreadyExists(String firstName, String lastName) {
-        Optional<PersonEntity> optionalPersonEntity = personRepo.findByFirstNameAndLastName(firstName, lastName);
-        return optionalPersonEntity.isPresent();
-    }
-
     public List<Person> getAllPersons() {
         List<PersonEntity> personsEntity = new ArrayList<>();
         personRepo.findAll().forEach(personsEntity::add);
@@ -103,6 +98,10 @@ public class SnaService {
     }
 
     public Person createPerson(PersonDto personDto) {
+        if (personRepo.findByFirstNameAndLastName(personDto.getFirstName(), personDto.getLastName()).isPresent()) {
+            throw new EntityExistsException();
+        }
+
         return mapPersonEntityToPerson(personRepo.save(mapPersonDtoToPersonEntity(personDto)));
     }
 
