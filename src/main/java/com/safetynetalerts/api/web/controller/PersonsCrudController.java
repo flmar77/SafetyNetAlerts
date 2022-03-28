@@ -44,7 +44,9 @@ public class PersonsCrudController {
     public ResponseEntity<?> createPersonDto(@RequestBody PersonDto personDto) {
         log.info("request to post PersonsDto : {}", personDto);
 
-        if (wrongPersonDtoInput(personDto)) {
+        if (personDto.getFirstName() == null || personDto.getFirstName().equals("")
+                || personDto.getLastName() == null || personDto.getLastName().equals("")
+                || personDto.getBirthdate() == null) {
             String errorMessage = "error while posting PersonDto because of wrong input : " + personDto;
             log.error(errorMessage);
             return ResponseEntity
@@ -72,7 +74,11 @@ public class PersonsCrudController {
     public ResponseEntity<?> updatePersonDto(@PathVariable String firstName, @PathVariable String lastName, @RequestBody PersonDto personDto) {
         log.info("request to put PersonsDto : {}", personDto);
 
-        if (wrongNamesDtoInput(firstName, lastName)) {
+        if (firstName == null || personDto.getFirstName() == null
+                || firstName.equals("") || personDto.getFirstName().equals("") || !firstName.equals(personDto.getFirstName())
+                || lastName == null || personDto.getLastName() == null
+                || lastName.equals("") || personDto.getLastName().equals("") || !lastName.equals(personDto.getLastName())
+                || personDto.getBirthdate() == null) {
             String errorMessage = "error while putting PersonDto because of wrong firstName=" + firstName + " and/or lastName=" + lastName;
             log.error(errorMessage);
             return ResponseEntity
@@ -99,7 +105,8 @@ public class PersonsCrudController {
     public ResponseEntity<String> deletePersonDto(@PathVariable String firstName, @PathVariable String lastName) {
         log.info("request to delete PersonsDto");
 
-        if (wrongNamesDtoInput(firstName, lastName)) {
+        if (firstName == null || firstName.equals("")
+                || lastName == null || lastName.equals("")) {
             String errorMessage = "error while deleting PersonDto because of wrong firstName=" + firstName + " and/or lastName=" + lastName;
             log.error(errorMessage);
             return ResponseEntity
@@ -128,12 +135,4 @@ public class PersonsCrudController {
                 .collect(Collectors.toList());
     }
 
-    private boolean wrongPersonDtoInput(PersonDto personDto) {
-        return wrongNamesDtoInput(personDto.getFirstName(), personDto.getLastName());
-    }
-
-    private boolean wrongNamesDtoInput(String firstName, String lastName) {
-        return firstName == null || firstName.equals("")
-                || lastName == null || lastName.equals("");
-    }
 }

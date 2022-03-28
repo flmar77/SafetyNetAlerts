@@ -204,7 +204,7 @@ public class PersonsCrudControllerTest {
                 "\"birthdate\": \"2002-01-01\"\n" +
                 "}\n";
 
-        mockMvc.perform(put("/persons/x&y")
+        mockMvc.perform(put("/persons/p1FirstName&p1LastName")
                         .content(inputJson)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -237,6 +237,7 @@ public class PersonsCrudControllerTest {
         when(personService.updatePersonWithoutMedicalRecords(anyString(), anyString(), any())).thenThrow(NoSuchElementException.class);
 
         var inputJson = "{\n" +
+                "\"firstName\": \"p1FirstName\",\n" +
                 "\"lastName\": \"p1LastName\",\n" +
                 "\"address\": \"p1Address\",\n" +
                 "\"city\": \"p1City\",\n" +
@@ -246,7 +247,7 @@ public class PersonsCrudControllerTest {
                 "\"birthdate\": \"2002-01-01\"\n" +
                 "}\n";
 
-        mockMvc.perform(put("/persons/x&y")
+        mockMvc.perform(put("/persons/p1FirstName&p1LastName")
                         .content(inputJson)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))

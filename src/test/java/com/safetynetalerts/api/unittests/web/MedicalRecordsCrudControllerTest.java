@@ -169,7 +169,7 @@ public class MedicalRecordsCrudControllerTest {
                 "]\n" +
                 "}";
 
-        mockMvc.perform(put("/medicalRecords/x&y")
+        mockMvc.perform(put("/medicalRecords/p1FirstName&p1LastName")
                         .content(inputJson)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -193,7 +193,7 @@ public class MedicalRecordsCrudControllerTest {
                 "]\n" +
                 "}";
 
-        mockMvc.perform(put("/medicalRecords/x&y")
+        mockMvc.perform(put("/medicalRecords/p1FirstName&p1LastName")
                         .content(inputJson)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))

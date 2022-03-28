@@ -106,8 +106,9 @@ public class FireStationsCrudController {
     public ResponseEntity<?> updateFireStationsDto(@PathVariable int station, @PathVariable String address, @RequestBody FireStationsDto fireStationsDto) {
         log.info("request to put FireStationsDto : {}", fireStationsDto);
 
-        if (station == 0
-                || address == null || address.equals("")) {
+        if (station == 0 || fireStationsDto.getStation() == 0 || station != fireStationsDto.getStation()
+                || address == null || fireStationsDto.getAddress() == null
+                || address.equals("") || fireStationsDto.getAddress().equals("") || !address.equals(fireStationsDto.getAddress())) {
             String errorMessage = "error while putting FireStationsDto because of wrong station=" + station + " and/or address" + address;
             log.error(errorMessage);
             return ResponseEntity

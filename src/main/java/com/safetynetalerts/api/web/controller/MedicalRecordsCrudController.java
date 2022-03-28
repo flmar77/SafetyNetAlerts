@@ -43,7 +43,10 @@ public class MedicalRecordsCrudController {
     public ResponseEntity<?> updateMedicalRecordsDto(@PathVariable String firstName, @PathVariable String lastName, @RequestBody MedicalRecordsDto medicalRecordsDto) {
         log.info("request to put MedicalRecordsDto : {}", medicalRecordsDto);
 
-        if (wrongNamesDtoInput(firstName, lastName)) {
+        if (firstName == null || medicalRecordsDto.getFirstName() == null
+                || firstName.equals("") || medicalRecordsDto.getFirstName().equals("") || !firstName.equals(medicalRecordsDto.getFirstName())
+                || lastName == null || medicalRecordsDto.getLastName() == null
+                || lastName.equals("") || medicalRecordsDto.getLastName().equals("") || !lastName.equals(medicalRecordsDto.getLastName())) {
             String errorMessage = "error while putting MedicalRecordsDto because of wrong firstName=" + firstName + " and/or lastName=" + lastName;
             log.error(errorMessage);
             return ResponseEntity
@@ -70,7 +73,8 @@ public class MedicalRecordsCrudController {
     public ResponseEntity<?> deleteMedicalRecordsDto(@PathVariable String firstName, @PathVariable String lastName) {
         log.info("request to delete MedicalRecordsDto of firstname={} and lastname={}", firstName, lastName);
 
-        if (wrongNamesDtoInput(firstName, lastName)) {
+        if (firstName == null || firstName.equals("")
+                || lastName == null || lastName.equals("")) {
             String errorMessage = "error while deleting MedicalRecordsDto because of wrong firstName=" + firstName + " and/or lastName=" + lastName;
             log.error(errorMessage);
             return ResponseEntity
@@ -99,8 +103,4 @@ public class MedicalRecordsCrudController {
                 .collect(Collectors.toList());
     }
 
-    private boolean wrongNamesDtoInput(String firstName, String lastName) {
-        return firstName == null || firstName.equals("")
-                || lastName == null || lastName.equals("");
-    }
 }
