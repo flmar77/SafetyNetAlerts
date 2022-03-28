@@ -1,7 +1,7 @@
 package com.safetynetalerts.api.unittests.web;
 
 import com.safetynetalerts.api.domain.model.Person;
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.PersonService;
 import com.safetynetalerts.api.web.controller.PersonsCrudController;
 import lombok.var;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,7 +34,7 @@ public class PersonsCrudControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private SnaService snaService;
+    private PersonService personService;
 
     private static final Person p1 = new Person();
     private static final Person p2 = new Person();
@@ -72,7 +72,7 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnPopulatedPersonsDto_whenGetPersons() throws Exception {
-        when(snaService.getAllPersons()).thenReturn(personList);
+        when(personService.getAllPersons()).thenReturn(personList);
 
         var expectedJson = "[\n" +
                 "{\n" +
@@ -104,7 +104,7 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnPopulatedPersonDto_whenGetPersonsByFirstNameAndLastName() throws Exception {
-        when(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(p1));
+        when(personService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(p1));
 
         var expectedJson = "[\n" +
                 "{\n" +
@@ -126,7 +126,7 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnPopulatedPersonDto_whenPostNewPersonDto() throws Exception {
-        when(snaService.createPerson(any())).thenReturn(p1);
+        when(personService.createPerson(any())).thenReturn(p1);
 
         var inputJson = "{\n" +
                 "\"firstName\": \"p1FirstName\",\n" +
@@ -169,7 +169,7 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnUnprocessableEntity_whenPostExistingPerson() throws Exception {
-        when(snaService.createPerson(any())).thenThrow(EntityExistsException.class);
+        when(personService.createPerson(any())).thenThrow(EntityExistsException.class);
 
         var inputJson = "{\n" +
                 "\"firstName\": \"p1FirstName\",\n" +
@@ -191,7 +191,7 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnPopulatedPersonDto_whenPutExistingPersonDto() throws Exception {
-        when(snaService.updatePersonWithoutMedicalRecords(anyString(), anyString(), any())).thenReturn(p1);
+        when(personService.updatePersonWithoutMedicalRecords(anyString(), anyString(), any())).thenReturn(p1);
 
         var inputJson = "{\n" +
                 "\"firstName\": \"p1FirstName\",\n" +
@@ -234,7 +234,7 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnNotFound_whenPutNewPersonDto() throws Exception {
-        when(snaService.updatePersonWithoutMedicalRecords(anyString(), anyString(), any())).thenThrow(NoSuchElementException.class);
+        when(personService.updatePersonWithoutMedicalRecords(anyString(), anyString(), any())).thenThrow(NoSuchElementException.class);
 
         var inputJson = "{\n" +
                 "\"lastName\": \"p1LastName\",\n" +
@@ -267,7 +267,7 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnNotFound_whenDeleteNewPerson() throws Exception {
-        doThrow(new NoSuchElementException()).when(snaService).deletePerson(anyString(), anyString());
+        doThrow(new NoSuchElementException()).when(personService).deletePerson(anyString(), anyString());
 
         mockMvc.perform(delete("/persons/x&y"))
                 .andExpect(status().isNotFound());

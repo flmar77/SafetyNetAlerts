@@ -1,15 +1,11 @@
 package com.safetynetalerts.api.unittests.domain;
 
 import com.googlecode.jmapper.JMapper;
-import com.safetynetalerts.api.dao.entity.FireStationEntity;
 import com.safetynetalerts.api.dao.entity.PersonEntity;
-import com.safetynetalerts.api.dao.repository.FireStationRepo;
 import com.safetynetalerts.api.dao.repository.PersonRepo;
-import com.safetynetalerts.api.domain.model.FireStation;
 import com.safetynetalerts.api.domain.model.Person;
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.PersonService;
 import com.safetynetalerts.api.helper.DateHelper;
-import com.safetynetalerts.api.web.dto.FireStationsDto;
 import com.safetynetalerts.api.web.dto.MedicalRecordsDto;
 import com.safetynetalerts.api.web.dto.PersonDto;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,16 +25,13 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class SnaServiceTest {
+public class PersonServiceTest {
 
     @InjectMocks
-    private SnaService snaService;
+    private PersonService personService;
 
     @Mock
     private PersonRepo personRepo;
-
-    @Mock
-    private FireStationRepo fireStationRepo;
 
     @Mock
     private DateHelper dateHelper;
@@ -46,8 +39,6 @@ public class SnaServiceTest {
     private static final PersonEntity pe1 = new PersonEntity();
     private static final PersonEntity pe2 = new PersonEntity();
     private static final PersonEntity pe3 = new PersonEntity();
-    private static FireStationEntity fs1;
-    private static FireStationEntity fs2;
     private static Person p1;
     private static Person p2;
     private static Person p3;
@@ -97,13 +88,6 @@ public class SnaServiceTest {
         JMapper<PersonDto, PersonEntity> personEntityToPersonDtoMapper = new JMapper<>(PersonDto.class, PersonEntity.class);
         pd1 = personEntityToPersonDtoMapper.getDestination(pe1);
 
-        fs1 = new FireStationEntity();
-        fs1.setStation(1);
-        fs1.setAddresses(Arrays.asList("adr1", "adr2"));
-        fs2 = new FireStationEntity();
-        fs2.setStation(2);
-        fs2.setAddresses(Arrays.asList("adr3", "adr4"));
-
     }
 
     @Test
@@ -111,14 +95,14 @@ public class SnaServiceTest {
         when(personRepo.findAllByFireStation(anyInt())).thenReturn(personEntityList);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
-        assertThat(snaService.getPersonsByStation(anyInt())).isEqualTo(personList);
+        assertThat(personService.getPersonsByStation(anyInt())).isEqualTo(personList);
     }
 
     @Test
     public void should_returnEmptyPersonList_whenGetPersonsByWrongStation() {
         when(personRepo.findAllByFireStation(anyInt())).thenReturn(personEntityEmptyList);
 
-        assertThat(snaService.getPersonsByStation(anyInt())).isEqualTo(personEmptyList);
+        assertThat(personService.getPersonsByStation(anyInt())).isEqualTo(personEmptyList);
     }
 
     @Test
@@ -126,7 +110,7 @@ public class SnaServiceTest {
         when(personRepo.findAllByFireStationIn(anyList())).thenReturn(personEntityList);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
-        assertThat(snaService.getPersonsByStations(anyList())).isEqualTo(personList);
+        assertThat(personService.getPersonsByStations(anyList())).isEqualTo(personList);
     }
 
 
@@ -135,44 +119,34 @@ public class SnaServiceTest {
         when(personRepo.findAllByAddress(anyString())).thenReturn(personEntityList);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
-        assertThat(snaService.getPersonsByAddress(anyString())).isEqualTo(personList);
+        assertThat(personService.getPersonsByAddress(anyString())).isEqualTo(personList);
     }
 
     @Test
     public void should_returnEmptyPersonList_whenGetPersonsByWrongAddress() {
         when(personRepo.findAllByAddress(anyString())).thenReturn(personEntityEmptyList);
 
-        assertThat(snaService.getPersonsByAddress(anyString())).isEqualTo(personEmptyList);
+        assertThat(personService.getPersonsByAddress(anyString())).isEqualTo(personEmptyList);
     }
 
     @Test
     public void should_countChildren_whenGetChildCounter() {
-        assertThat(snaService.getChildCounter(personList)).isEqualTo(2);
+        assertThat(personService.getChildCounter(personList)).isEqualTo(2);
     }
 
     @Test
     public void should_countAdults_whenGetAdultCounter() {
-        assertThat(snaService.getAdultCounter(personList)).isEqualTo(1);
+        assertThat(personService.getAdultCounter(personList)).isEqualTo(1);
     }
 
     @Test
     public void should_returnChildrenList_whenGetChildren() {
-        assertThat(snaService.getChildren(personList)).isEqualTo(Arrays.asList(p1, p2));
+        assertThat(personService.getChildren(personList)).isEqualTo(Arrays.asList(p1, p2));
     }
 
     @Test
     public void should_returnAdultsList_whenGetAdults() {
-        assertThat(snaService.getAdults(personList)).isEqualTo(Collections.singletonList(p3));
-    }
-
-    @Test
-    public void should_returnFireStation_whenGetFireStationOfPopulatedPersonList() {
-        assertThat(snaService.getFireStation(personList)).isEqualTo(1);
-    }
-
-    @Test
-    public void should_returnZero_whenGetFireStationOfEmptyPersonList() {
-        assertThat(snaService.getFireStation(personEmptyList)).isEqualTo(0);
+        assertThat(personService.getAdults(personList)).isEqualTo(Collections.singletonList(p3));
     }
 
     @Test
@@ -180,7 +154,7 @@ public class SnaServiceTest {
         when(personRepo.findAllByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(pe1));
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
-        assertThat(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).isEqualTo(Collections.singletonList(p1));
+        assertThat(personService.getPersonsByFirstNameAndLastName(anyString(), anyString())).isEqualTo(Collections.singletonList(p1));
     }
 
     @Test
@@ -188,7 +162,7 @@ public class SnaServiceTest {
         when(personRepo.findAllByCity(anyString())).thenReturn(personEntityList);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
-        assertThat(snaService.getPersonsByCity(anyString())).isEqualTo(personList);
+        assertThat(personService.getPersonsByCity(anyString())).isEqualTo(personList);
     }
 
     @Test
@@ -196,7 +170,7 @@ public class SnaServiceTest {
         when(personRepo.findAll()).thenReturn(personEntityList);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
-        assertThat(snaService.getAllPersons()).isEqualTo(personList);
+        assertThat(personService.getAllPersons()).isEqualTo(personList);
     }
 
     @Test
@@ -205,14 +179,14 @@ public class SnaServiceTest {
         when(personRepo.save(any())).thenReturn(pe1);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
-        assertThat(snaService.createPerson(pd1)).isEqualTo(p1);
+        assertThat(personService.createPerson(pd1)).isEqualTo(p1);
     }
 
     @Test
     public void should_throwEntityExistsException_whenCreateExistingPerson() {
         when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(pe1));
 
-        assertThrows(EntityExistsException.class, () -> snaService.createPerson(pd1));
+        assertThrows(EntityExistsException.class, () -> personService.createPerson(pd1));
     }
 
     @Test
@@ -221,21 +195,21 @@ public class SnaServiceTest {
         when(personRepo.save(any())).thenReturn(pe1);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
-        assertThat(snaService.updatePersonWithoutMedicalRecords(pd1.getFirstName(), pd1.getLastName(), pd1)).isEqualTo(p1);
+        assertThat(personService.updatePersonWithoutMedicalRecords(pd1.getFirstName(), pd1.getLastName(), pd1)).isEqualTo(p1);
     }
 
     @Test
     public void should_throwNoSuchElementException_whenUpdateNonExistingPerson() {
         when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> snaService.updatePersonWithoutMedicalRecords(anyString(), anyString(), pd1));
+        assertThrows(NoSuchElementException.class, () -> personService.updatePersonWithoutMedicalRecords(anyString(), anyString(), pd1));
     }
 
     @Test
     public void should_delete_whenDeleteExistingPerson() {
         when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.of(pe1));
 
-        snaService.deletePerson(anyString(), anyString());
+        personService.deletePerson(anyString(), anyString());
 
         verify(personRepo, times(1)).delete(pe1);
     }
@@ -244,154 +218,7 @@ public class SnaServiceTest {
     public void should_throwNoSuchElementException_whenDeleteNonExistingPerson() {
         when(personRepo.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> snaService.deletePerson(anyString(), anyString()));
-    }
-
-    @Test
-    public void should_returnPopulatedFireStations_whenGetAllFireStations() {
-        when(fireStationRepo.findAll()).thenReturn(Arrays.asList(fs1, fs2));
-
-        List<FireStation> fireStationList = snaService.getAllFireStations();
-
-        assertThat(fireStationList).isNotNull();
-        assertThat(fireStationList.get(0).getAddresses().get(0)).isEqualTo("adr1");
-        assertThat(fireStationList.get(1).getAddresses().get(1)).isEqualTo("adr4");
-    }
-
-    @Test
-    public void should_throwNoSuchElementException_whenGetEmptyFireStationByStationAndAddress() {
-        when(fireStationRepo.findByStation(anyInt())).thenReturn(Optional.empty());
-
-        assertThrows(NoSuchElementException.class, () -> snaService.getFireStationByStationAndAddress(1, anyString()));
-    }
-
-    @Test
-    public void should_returnPopulatedFireStation_whenGetPopulatedFireStationByStationAndAddress() {
-        when(fireStationRepo.findByStation(anyInt())).thenReturn(Optional.of(fs1));
-
-        FireStation fireStation = snaService.getFireStationByStationAndAddress(1, "adr1");
-
-        assertThat(fireStation).isNotNull();
-        assertThat(fireStation.getAddresses().get(0)).isEqualTo("adr1");
-    }
-
-    @Test
-    public void should_throwNoSuchElementException_whenGetPopulatedFireStationByStationAndMismatchAddress() {
-        when(fireStationRepo.findByStation(anyInt())).thenReturn(Optional.of(fs1));
-
-        assertThrows(NoSuchElementException.class, () -> snaService.getFireStationByStationAndAddress(1, "adrWrong"));
-    }
-
-    @Test
-    public void should_throwEntityExistsException_whenCreateExistingFireStationMapping() {
-        when(fireStationRepo.findByStation(1)).thenReturn(Optional.of(fs1));
-
-        FireStationsDto fireStationsDto = new FireStationsDto();
-        fireStationsDto.setStation(1);
-        fireStationsDto.setAddress("adr1");
-
-        assertThrows(EntityExistsException.class, () -> snaService.createFireStationMapping(fireStationsDto));
-    }
-
-    @Test
-    public void should_addAddressToFireStation_whenCreateFireStationMappingOfExistingFireStationAndNewAddress() {
-        when(fireStationRepo.findByStation(1)).thenReturn(Optional.of(fs1));
-
-        FireStationsDto fireStationsDto = new FireStationsDto();
-        fireStationsDto.setStation(1);
-        fireStationsDto.setAddress("adrAdd");
-
-        snaService.createFireStationMapping(fireStationsDto);
-
-        verify(fireStationRepo, times(1)).save(argThat(it -> {
-            assertThat(it.getAddresses().get(2)).isEqualTo("adrAdd");
-            return true;
-        }));
-    }
-
-    @Test
-    public void should_createNewFireStation_whenCreateFireStationMappingOfNewFireStation() {
-        when(fireStationRepo.findByStation(1)).thenReturn(Optional.empty());
-
-        FireStationsDto fireStationsDto = new FireStationsDto();
-        fireStationsDto.setStation(1);
-        fireStationsDto.setAddress("adrNew");
-
-        snaService.createFireStationMapping(fireStationsDto);
-
-        verify(fireStationRepo, times(1)).save(argThat(it -> {
-            assertThat(it.getAddresses().get(0)).isEqualTo("adrNew");
-            return true;
-        }));
-
-    }
-
-    @Test
-    public void should_throwEntityExistsException_whenUpdateExistingFireStationMapping() {
-        when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.of(fs1));
-
-        FireStationsDto fireStationsDto = new FireStationsDto();
-        fireStationsDto.setStation(1);
-        fireStationsDto.setAddress("adr1");
-
-        assertThrows(EntityExistsException.class, () -> snaService.updateFireStationMapping(fireStationsDto));
-    }
-
-    @Test
-    public void should_updateFireStationsAndPersons_whenUpdateFireStationMappingOfExistingAddressOnAnotherFireStation() {
-        FireStationEntity fsUpdate = new FireStationEntity();
-        fsUpdate.setStation(3);
-        fsUpdate.setAddresses(Arrays.asList("adr5", "adr6"));
-        when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.of(fsUpdate));
-
-        FireStationsDto fireStationsDto = new FireStationsDto();
-        fireStationsDto.setStation(4);
-        fireStationsDto.setAddress("adr5");
-
-        snaService.updateFireStationMapping(fireStationsDto);
-
-        verify(fireStationRepo, times(2)).save(any(FireStationEntity.class));
-        verify(personRepo, times(1)).saveAll(anyList());
-    }
-
-    @Test
-    public void should_throwNoSuchElementException_whenUpdateFireStationMappingOfNonExistingAddress() {
-        when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.empty());
-
-        FireStationsDto fireStationsDto = new FireStationsDto();
-        fireStationsDto.setStation(0);
-        fireStationsDto.setAddress("adrWrong");
-
-        assertThrows(NoSuchElementException.class, () -> snaService.updateFireStationMapping(fireStationsDto));
-    }
-
-    @Test
-    public void should_deleteFireStationMapping_whenDeleteExistingFireStationMapping() {
-        FireStationEntity fsDelete = new FireStationEntity();
-        fsDelete.setStation(5);
-        fsDelete.setAddresses(Arrays.asList("adr7", "adr8"));
-        when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.of(fsDelete));
-
-        snaService.deleteFireStationMapping(5, "adr7");
-
-        verify(fireStationRepo, times(1)).save(any(FireStationEntity.class));
-    }
-
-    @Test
-    public void should_throwNoSuchElementException_whenDeleteFireStationMappingOfExistingAddressOnAnotherFireStation() {
-        FireStationEntity fsDelete = new FireStationEntity();
-        fsDelete.setStation(5);
-        fsDelete.setAddresses(Arrays.asList("adr7", "adr8"));
-        when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.of(fsDelete));
-
-        assertThrows(NoSuchElementException.class, () -> snaService.deleteFireStationMapping(6, "adr8"));
-    }
-
-    @Test
-    public void should_throwNoSuchElementException_whenDeleteNewFireStationMapping() {
-        when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.empty());
-
-        assertThrows(NoSuchElementException.class, () -> snaService.deleteFireStationMapping(6, "adr8"));
+        assertThrows(NoSuchElementException.class, () -> personService.deletePerson(anyString(), anyString()));
     }
 
     @Test
@@ -415,7 +242,7 @@ public class SnaServiceTest {
         when(personRepo.save(any(PersonEntity.class))).thenReturn(peTestMedical);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
-        snaService.updatePersonMedicalRecords("peFirstName", "peLastName", mrTestMedical);
+        personService.updatePersonMedicalRecords("peFirstName", "peLastName", mrTestMedical);
 
         verify(personRepo, times(1)).save(argThat(it -> {
             assertThat(it.getMedications().get(0)).isEqualTo("a");
@@ -439,7 +266,7 @@ public class SnaServiceTest {
         when(personRepo.save(any(PersonEntity.class))).thenReturn(peTestMedical);
         when(dateHelper.now()).thenReturn(LocalDate.of(2020, 2, 1));
 
-        snaService.deletePersonMedicalRecords("peFirstName", "peLastName");
+        personService.deletePersonMedicalRecords("peFirstName", "peLastName");
 
         verify(personRepo, times(1)).save(argThat(it -> {
             assertThat(it.getMedications()).isEqualTo(Collections.emptyList());
@@ -448,17 +275,27 @@ public class SnaServiceTest {
     }
 
     @Test
-    public void should_SaveAll_whenSaveAllFireStationEntities() {
-        snaService.saveAllFireStationEntities(anyList());
+    public void should_SaveAll_whenSaveAllPersonEntities() {
+        personService.saveAllPersonEntities(anyList());
 
-        verify(fireStationRepo, times(1)).saveAll(anyList());
+        verify(personRepo, times(1)).saveAll(anyList());
     }
 
     @Test
-    public void should_SaveAll_whenSaveAllPersonEntities() {
-        snaService.saveAllPersonEntities(anyList());
+    public void should_SaveAll_whenSaveAllPersons() {
+        personService.saveAllPersons(anyList());
 
         verify(personRepo, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    public void should_returnFireStation_whenGetFireStationOfPopulatedPersonList() {
+        assertThat(personService.getFireStation(personList)).isEqualTo(1);
+    }
+
+    @Test
+    public void should_returnZero_whenGetFireStationOfEmptyPersonList() {
+        assertThat(personService.getFireStation(personEmptyList)).isEqualTo(0);
     }
 
 }

@@ -1,7 +1,7 @@
 package com.safetynetalerts.api.web.controller;
 
 import com.safetynetalerts.api.domain.model.FireStation;
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.FireStationService;
 import com.safetynetalerts.api.web.dto.FireStationsDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +19,13 @@ import java.util.NoSuchElementException;
 public class FireStationsCrudController {
 
     @Autowired
-    private SnaService snaService;
+    private FireStationService fireStationService;
 
     @GetMapping("/firestations")
     public List<FireStationsDto> getAllFireStationsDto() {
         log.info("request to get AllFireStationsDto");
 
-        List<FireStation> fireStationList = snaService.getAllFireStations();
+        List<FireStation> fireStationList = fireStationService.getAllFireStations();
 
         List<FireStationsDto> fireStationsDtoList = new ArrayList<>();
 
@@ -56,7 +56,7 @@ public class FireStationsCrudController {
         }
 
         try {
-            FireStation fireStation = snaService.getFireStationByStationAndAddress(station, address);
+            FireStation fireStation = fireStationService.getFireStationByStationAndAddress(station, address);
 
             fireStationsDto.setStation(fireStation.getStation());
             fireStationsDto.setAddress(fireStation.getAddresses().get(0));
@@ -88,7 +88,7 @@ public class FireStationsCrudController {
         }
 
         try {
-            snaService.createFireStationMapping(fireStationsDto);
+            fireStationService.createFireStationMapping(fireStationsDto);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(fireStationsDto);
@@ -116,7 +116,7 @@ public class FireStationsCrudController {
         }
 
         try {
-            snaService.updateFireStationMapping(fireStationsDto);
+            fireStationService.updateFireStationMapping(fireStationsDto);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(fireStationsDto);
@@ -149,7 +149,7 @@ public class FireStationsCrudController {
         }
 
         try {
-            snaService.deleteFireStationMapping(station, address);
+            fireStationService.deleteFireStationMapping(station, address);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body("successfully delete");

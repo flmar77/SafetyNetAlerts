@@ -1,7 +1,7 @@
 package com.safetynetalerts.api.unittests.web;
 
 import com.safetynetalerts.api.domain.model.Person;
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.PersonService;
 import com.safetynetalerts.api.web.controller.MedicalRecordsCrudController;
 import com.safetynetalerts.api.web.dto.MedicalRecordsDto;
 import lombok.var;
@@ -34,7 +34,7 @@ public class MedicalRecordsCrudControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private SnaService snaService;
+    private PersonService personService;
 
     private static final Person p1 = new Person();
     private static final Person p2 = new Person();
@@ -71,7 +71,7 @@ public class MedicalRecordsCrudControllerTest {
 
     @Test
     public void should_returnPopulatedMedicalRecordsDto_whenGetMedicalRecords() throws Exception {
-        when(snaService.getAllPersons()).thenReturn(personList);
+        when(personService.getAllPersons()).thenReturn(personList);
 
         var expectedJson = "[\n" +
                 "{\n" +
@@ -107,7 +107,7 @@ public class MedicalRecordsCrudControllerTest {
 
     @Test
     public void should_returnPopulatedMedicalRecordDto_whenGetMedicalRecord() throws Exception {
-        when(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(p1));
+        when(personService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(p1));
 
         var expectedJson = "[\n" +
                 "{\n" +
@@ -154,7 +154,7 @@ public class MedicalRecordsCrudControllerTest {
 
     @Test
     public void should_returnOk_whenPutRightMedicalRecordsDto() throws Exception {
-        when(snaService.updatePersonMedicalRecords(anyString(), anyString(), any(MedicalRecordsDto.class))).thenReturn(p1);
+        when(personService.updatePersonMedicalRecords(anyString(), anyString(), any(MedicalRecordsDto.class))).thenReturn(p1);
 
         var inputJson = "{\n" +
                 "\"firstName\": \"p1FirstName\",\n" +
@@ -178,7 +178,7 @@ public class MedicalRecordsCrudControllerTest {
 
     @Test
     public void should_returnNotFound_whenPutNewMedicalRecordsDto() throws Exception {
-        doThrow(new NoSuchElementException()).when(snaService).updatePersonMedicalRecords(anyString(), anyString(), any(MedicalRecordsDto.class));
+        doThrow(new NoSuchElementException()).when(personService).updatePersonMedicalRecords(anyString(), anyString(), any(MedicalRecordsDto.class));
 
         var inputJson = "{\n" +
                 "\"firstName\": \"p1FirstName\",\n" +
@@ -214,7 +214,7 @@ public class MedicalRecordsCrudControllerTest {
 
     @Test
     public void should_returnNotFound_whenDeleteNewMedicalRecordsDto() throws Exception {
-        doThrow(new NoSuchElementException()).when(snaService).deletePersonMedicalRecords(anyString(), anyString());
+        doThrow(new NoSuchElementException()).when(personService).deletePersonMedicalRecords(anyString(), anyString());
 
         mockMvc.perform(delete("/medicalRecords/x&y"))
                 .andExpect(status().isNotFound());

@@ -2,7 +2,7 @@ package com.safetynetalerts.api.web.controller;
 
 import com.googlecode.jmapper.JMapper;
 import com.safetynetalerts.api.domain.model.Person;
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.PersonService;
 import com.safetynetalerts.api.web.dto.PersonDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
 public class PersonsCrudController {
 
     @Autowired
-    private SnaService snaService;
+    private PersonService personService;
 
     @GetMapping("/persons")
     public List<PersonDto> getAllPersonsDto() {
         log.info("request to get AllPersonsDto");
 
-        List<Person> personList = snaService.getAllPersons();
+        List<Person> personList = personService.getAllPersons();
 
         return mapPersonsToPersonsDto(personList);
     }
@@ -35,7 +35,7 @@ public class PersonsCrudController {
     public List<PersonDto> getPersonsDto(@PathVariable String firstName, @PathVariable String lastName) {
         log.info("request to get PersonsDto of firstName={} & lastName={}", firstName, lastName);
 
-        List<Person> personList = snaService.getPersonsByFirstNameAndLastName(firstName, lastName);
+        List<Person> personList = personService.getPersonsByFirstNameAndLastName(firstName, lastName);
 
         return mapPersonsToPersonsDto(personList);
     }
@@ -53,7 +53,7 @@ public class PersonsCrudController {
         }
 
         try {
-            Person person = snaService.createPerson(personDto);
+            Person person = personService.createPerson(personDto);
             JMapper<PersonDto, Person> personToPersonDtoMapper = new JMapper<>(PersonDto.class, Person.class);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
@@ -81,7 +81,7 @@ public class PersonsCrudController {
         }
 
         try {
-            Person person = snaService.updatePersonWithoutMedicalRecords(firstName, lastName, personDto);
+            Person person = personService.updatePersonWithoutMedicalRecords(firstName, lastName, personDto);
             JMapper<PersonDto, Person> personToPersonDtoMapper = new JMapper<>(PersonDto.class, Person.class);
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -108,7 +108,7 @@ public class PersonsCrudController {
         }
 
         try {
-            snaService.deletePerson(firstName, lastName);
+            personService.deletePerson(firstName, lastName);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body("successfully delete");

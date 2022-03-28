@@ -2,7 +2,7 @@ package com.safetynetalerts.api.web.controller;
 
 import com.googlecode.jmapper.JMapper;
 import com.safetynetalerts.api.domain.model.Person;
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.PersonService;
 import com.safetynetalerts.api.web.dto.MedicalRecordsDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 public class MedicalRecordsCrudController {
 
     @Autowired
-    private SnaService snaService;
+    private PersonService personService;
 
     @GetMapping("/medicalRecords")
     public List<MedicalRecordsDto> getAllMedicalRecordsDto() {
         log.info("request to get AllMedicalRecordsDto");
 
-        List<Person> personList = snaService.getAllPersons();
+        List<Person> personList = personService.getAllPersons();
 
         return mapPersonsToMedicalRecordsDto(personList);
     }
@@ -34,7 +34,7 @@ public class MedicalRecordsCrudController {
     public List<MedicalRecordsDto> getMedicalRecordsDto(@PathVariable String firstName, @PathVariable String lastName) {
         log.info("request to get MedicalRecordsDto of firstName={} & lastName={}", firstName, lastName);
 
-        List<Person> personList = snaService.getPersonsByFirstNameAndLastName(firstName, lastName);
+        List<Person> personList = personService.getPersonsByFirstNameAndLastName(firstName, lastName);
 
         return mapPersonsToMedicalRecordsDto(personList);
     }
@@ -52,7 +52,7 @@ public class MedicalRecordsCrudController {
         }
 
         try {
-            Person person = snaService.updatePersonMedicalRecords(firstName, lastName, medicalRecordsDto);
+            Person person = personService.updatePersonMedicalRecords(firstName, lastName, medicalRecordsDto);
             JMapper<MedicalRecordsDto, Person> personToMedicalRecordsDtoMapper = new JMapper<>(MedicalRecordsDto.class, Person.class);
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -79,7 +79,7 @@ public class MedicalRecordsCrudController {
         }
 
         try {
-            snaService.deletePersonMedicalRecords(firstName, lastName);
+            personService.deletePersonMedicalRecords(firstName, lastName);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body("successfully deleted");

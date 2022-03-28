@@ -2,7 +2,7 @@ package com.safetynetalerts.api.web.controller;
 
 import com.googlecode.jmapper.JMapper;
 import com.safetynetalerts.api.domain.model.Person;
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.PersonService;
 import com.safetynetalerts.api.web.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class FunctionalController {
 
     @Autowired
-    private SnaService snaService;
+    private PersonService personService;
 
     @GetMapping("/firestation")
     public FireStationDto getFireStationDto(@RequestParam int stationNumber) {
@@ -26,7 +26,7 @@ public class FunctionalController {
 
         FireStationDto fireStationDto = new FireStationDto();
 
-        List<Person> personList = snaService.getPersonsByStation(stationNumber);
+        List<Person> personList = personService.getPersonsByStation(stationNumber);
 
         JMapper<FireStationPersonDto, Person> personMapper = new JMapper<>(FireStationPersonDto.class, Person.class);
         List<FireStationPersonDto> fireStationPersons = personList.stream()
@@ -34,8 +34,8 @@ public class FunctionalController {
                 .collect(Collectors.toList());
         fireStationDto.setFireStationPersons(fireStationPersons);
 
-        fireStationDto.setChildCounter(snaService.getChildCounter(personList));
-        fireStationDto.setAdultCounter(snaService.getAdultCounter(personList));
+        fireStationDto.setChildCounter(personService.getChildCounter(personList));
+        fireStationDto.setAdultCounter(personService.getAdultCounter(personList));
 
         return fireStationDto;
     }
@@ -46,13 +46,13 @@ public class FunctionalController {
 
         ChildAlertDto childAlertDto = new ChildAlertDto();
 
-        List<Person> personList = snaService.getPersonsByAddress(address);
+        List<Person> personList = personService.getPersonsByAddress(address);
 
         JMapper<ChildAlertPersonDto, Person> personMapper = new JMapper<>(ChildAlertPersonDto.class, Person.class);
-        List<ChildAlertPersonDto> ChildList = snaService.getChildren(personList).stream()
+        List<ChildAlertPersonDto> ChildList = personService.getChildren(personList).stream()
                 .map(personMapper::getDestination)
                 .collect(Collectors.toList());
-        List<ChildAlertPersonDto> AdultList = snaService.getAdults(personList).stream()
+        List<ChildAlertPersonDto> AdultList = personService.getAdults(personList).stream()
                 .map(personMapper::getDestination)
                 .collect(Collectors.toList());
 
@@ -68,7 +68,7 @@ public class FunctionalController {
 
         PhoneAlertDto phoneAlertDto = new PhoneAlertDto();
 
-        List<Person> personList = snaService.getPersonsByStation(firestation_number);
+        List<Person> personList = personService.getPersonsByStation(firestation_number);
 
         List<String> phones = personList.stream()
                 .map(Person::getPhone)
@@ -86,7 +86,7 @@ public class FunctionalController {
 
         FireDto fireDto = new FireDto();
 
-        List<Person> personList = snaService.getPersonsByAddress(address);
+        List<Person> personList = personService.getPersonsByAddress(address);
 
         JMapper<FirePersonDto, Person> personMapper = new JMapper<>(FirePersonDto.class, Person.class);
         List<FirePersonDto> firePersons = personList.stream()
@@ -94,7 +94,7 @@ public class FunctionalController {
                 .collect(Collectors.toList());
         fireDto.setFirePersons(firePersons);
 
-        fireDto.setFireStation(snaService.getFireStation(personList));
+        fireDto.setFireStation(personService.getFireStation(personList));
 
         return fireDto;
     }
@@ -105,7 +105,7 @@ public class FunctionalController {
 
         StationsDto stationsDto = new StationsDto();
 
-        List<Person> personList = snaService.getPersonsByStations(stationNumbers);
+        List<Person> personList = personService.getPersonsByStations(stationNumbers);
 
         JMapper<StationsPersonDto, Person> personMapper = new JMapper<>(StationsPersonDto.class, Person.class);
         List<StationsPersonByAddressDto> personsByAddress = personList.stream()
@@ -132,7 +132,7 @@ public class FunctionalController {
 
         PersonInfoDto personInfoDto = new PersonInfoDto();
 
-        List<Person> personList = snaService.getPersonsByFirstNameAndLastName(firstName, lastName);
+        List<Person> personList = personService.getPersonsByFirstNameAndLastName(firstName, lastName);
 
         JMapper<PersonInfoPersonDto, Person> personMapper = new JMapper<>(PersonInfoPersonDto.class, Person.class);
         List<PersonInfoPersonDto> personsInfo = personList.stream()
@@ -149,7 +149,7 @@ public class FunctionalController {
 
         CommunityEmailDto communityEmailDto = new CommunityEmailDto();
 
-        List<Person> personList = snaService.getPersonsByCity(city);
+        List<Person> personList = personService.getPersonsByCity(city);
 
         List<String> emails = personList.stream()
                 .map(Person::getEmail)
