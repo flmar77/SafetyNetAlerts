@@ -2,7 +2,7 @@ package com.safetynetalerts.api.web.controller;
 
 import com.googlecode.jmapper.JMapper;
 import com.safetynetalerts.api.domain.model.Person;
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.PersonService;
 import com.safetynetalerts.api.web.dto.MedicalRecordsDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 public class MedicalRecordsCrudController {
 
     @Autowired
-    private SnaService snaService;
+    private PersonService personService;
 
     @GetMapping("/medicalRecords")
     public List<MedicalRecordsDto> getAllMedicalRecordsDto() {
         log.info("request to get AllMedicalRecordsDto");
 
-        List<Person> personList = snaService.getAllPersons();
+        List<Person> personList = personService.getAllPersons();
 
         return mapPersonsToMedicalRecordsDto(personList);
     }
@@ -34,7 +34,7 @@ public class MedicalRecordsCrudController {
     public List<MedicalRecordsDto> getMedicalRecordsDto(@PathVariable String firstName, @PathVariable String lastName) {
         log.info("request to get MedicalRecordsDto of firstName={} & lastName={}", firstName, lastName);
 
-        List<Person> personList = snaService.getPersonsByFirstNameAndLastName(firstName, lastName);
+        List<Person> personList = personService.getPersonsByFirstNameAndLastName(firstName, lastName);
 
         return mapPersonsToMedicalRecordsDto(personList);
     }
@@ -43,7 +43,10 @@ public class MedicalRecordsCrudController {
     public ResponseEntity<?> updateMedicalRecordsDto(@PathVariable String firstName, @PathVariable String lastName, @RequestBody MedicalRecordsDto medicalRecordsDto) {
         log.info("request to put MedicalRecordsDto : {}", medicalRecordsDto);
 
-        if (wrongNamesDtoInput(firstName, lastName)) {
+        if (firstName == null || medicalRecordsDto.getFirstName() == null
+                || firstName.equals("") || medicalRecordsDto.getFirstName().equals("") || !firstName.equals(medicalRecordsDto.getFirstName())
+                || lastName == null || medicalRecordsDto.getLastName() == null
+                || lastName.equals("") || medicalRecordsDto.getLastName().equals("") || !lastName.equals(medicalRecordsDto.getLastName())) {
             String errorMessage = "error while putting MedicalRecordsDto because of wrong firstName=" + firstName + " and/or lastName=" + lastName;
             log.error(errorMessage);
             return ResponseEntity
@@ -52,7 +55,7 @@ public class MedicalRecordsCrudController {
         }
 
         try {
-            Person person = snaService.updatePersonMedicalRecords(firstName, lastName, medicalRecordsDto);
+            Person person = personService.updatePersonMedicalRecords(firstName, lastName, medicalRecordsDto);
             JMapper<MedicalRecordsDto, Person> personToMedicalRecordsDtoMapper = new JMapper<>(MedicalRecordsDto.class, Person.class);
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -70,7 +73,8 @@ public class MedicalRecordsCrudController {
     public ResponseEntity<?> deleteMedicalRecordsDto(@PathVariable String firstName, @PathVariable String lastName) {
         log.info("request to delete MedicalRecordsDto of firstname={} and lastname={}", firstName, lastName);
 
-        if (wrongNamesDtoInput(firstName, lastName)) {
+        if (firstName == null || firstName.equals("")
+                || lastName == null || lastName.equals("")) {
             String errorMessage = "error while deleting MedicalRecordsDto because of wrong firstName=" + firstName + " and/or lastName=" + lastName;
             log.error(errorMessage);
             return ResponseEntity
@@ -79,7 +83,7 @@ public class MedicalRecordsCrudController {
         }
 
         try {
-            snaService.deletePersonMedicalRecords(firstName, lastName);
+            personService.deletePersonMedicalRecords(firstName, lastName);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body("successfully deleted");
@@ -99,8 +103,4 @@ public class MedicalRecordsCrudController {
                 .collect(Collectors.toList());
     }
 
-    private boolean wrongNamesDtoInput(String firstName, String lastName) {
-        return firstName == null || firstName.equals("")
-                || lastName == null || lastName.equals("");
-    }
 }

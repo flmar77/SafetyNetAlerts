@@ -2,7 +2,7 @@ package com.safetynetalerts.api.web.controller;
 
 import com.googlecode.jmapper.JMapper;
 import com.safetynetalerts.api.domain.model.Person;
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.PersonService;
 import com.safetynetalerts.api.web.dto.PersonDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityExistsException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -19,13 +20,13 @@ import java.util.stream.Collectors;
 public class PersonsCrudController {
 
     @Autowired
-    private SnaService snaService;
+    private PersonService personService;
 
     @GetMapping("/persons")
     public List<PersonDto> getAllPersonsDto() {
         log.info("request to get AllPersonsDto");
 
-        List<Person> personList = snaService.getAllPersons();
+        List<Person> personList = personService.getAllPersons();
 
         return mapPersonsToPersonsDto(personList);
     }
@@ -34,7 +35,7 @@ public class PersonsCrudController {
     public List<PersonDto> getPersonsDto(@PathVariable String firstName, @PathVariable String lastName) {
         log.info("request to get PersonsDto of firstName={} & lastName={}", firstName, lastName);
 
-        List<Person> personList = snaService.getPersonsByFirstNameAndLastName(firstName, lastName);
+        List<Person> personList = personService.getPersonsByFirstNameAndLastName(firstName, lastName);
 
         return mapPersonsToPersonsDto(personList);
     }
@@ -43,15 +44,23 @@ public class PersonsCrudController {
     public ResponseEntity<?> createPersonDto(@RequestBody PersonDto personDto) {
         log.info("request to post PersonsDto : {}", personDto);
 
-        if (wrongPersonDtoInput(personDto)) {
+        if (personDto.getFirstName() == null || personDto.getFirstName().equals("")
+                || personDto.getLastName() == null || personDto.getLastName().equals("")
+                || personDto.getBirthdate() == null) {
             String errorMessage = "error while posting PersonDto because of wrong input : " + personDto;
             log.error(errorMessage);
             return ResponseEntity
                     .status(HttpStatus.UNPROCESSABLE_ENTITY)
                     .body(errorMessage);
         }
-        
-        if (snaService.personAlreadyExists(personDto.getFirstName(), personDto.getLastName())) {
+
+        try {
+            Person person = personService.createPerson(personDto);
+            JMapper<PersonDto, Person> personToPersonDtoMapper = new JMapper<>(PersonDto.class, Person.class);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(personToPersonDtoMapper.getDestination(person));
+        } catch (EntityExistsException e) {
             String errorMessage = "error while posting PersonDto because of existing person with firstName=" + personDto.getFirstName() + " & lastName=" + personDto.getLastName();
             log.error(errorMessage);
             return ResponseEntity
@@ -59,17 +68,17 @@ public class PersonsCrudController {
                     .body(errorMessage);
         }
 
-        JMapper<PersonDto, Person> personToPersonDtoMapper = new JMapper<>(PersonDto.class, Person.class);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(personToPersonDtoMapper.getDestination(snaService.createPerson(personDto)));
     }
 
     @PutMapping("/persons/{firstName}&{lastName}")
     public ResponseEntity<?> updatePersonDto(@PathVariable String firstName, @PathVariable String lastName, @RequestBody PersonDto personDto) {
         log.info("request to put PersonsDto : {}", personDto);
 
-        if (wrongNamesDtoInput(firstName, lastName)) {
+        if (firstName == null || personDto.getFirstName() == null
+                || firstName.equals("") || personDto.getFirstName().equals("") || !firstName.equals(personDto.getFirstName())
+                || lastName == null || personDto.getLastName() == null
+                || lastName.equals("") || personDto.getLastName().equals("") || !lastName.equals(personDto.getLastName())
+                || personDto.getBirthdate() == null) {
             String errorMessage = "error while putting PersonDto because of wrong firstName=" + firstName + " and/or lastName=" + lastName;
             log.error(errorMessage);
             return ResponseEntity
@@ -78,7 +87,7 @@ public class PersonsCrudController {
         }
 
         try {
-            Person person = snaService.updatePersonWithoutMedicalRecords(firstName, lastName, personDto);
+            Person person = personService.updatePersonWithoutMedicalRecords(firstName, lastName, personDto);
             JMapper<PersonDto, Person> personToPersonDtoMapper = new JMapper<>(PersonDto.class, Person.class);
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -96,7 +105,8 @@ public class PersonsCrudController {
     public ResponseEntity<String> deletePersonDto(@PathVariable String firstName, @PathVariable String lastName) {
         log.info("request to delete PersonsDto");
 
-        if (wrongNamesDtoInput(firstName, lastName)) {
+        if (firstName == null || firstName.equals("")
+                || lastName == null || lastName.equals("")) {
             String errorMessage = "error while deleting PersonDto because of wrong firstName=" + firstName + " and/or lastName=" + lastName;
             log.error(errorMessage);
             return ResponseEntity
@@ -105,7 +115,7 @@ public class PersonsCrudController {
         }
 
         try {
-            snaService.deletePerson(firstName, lastName);
+            personService.deletePerson(firstName, lastName);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body("successfully delete");
@@ -125,12 +135,4 @@ public class PersonsCrudController {
                 .collect(Collectors.toList());
     }
 
-    private boolean wrongPersonDtoInput(PersonDto personDto) {
-        return wrongNamesDtoInput(personDto.getFirstName(), personDto.getLastName());
-    }
-
-    private boolean wrongNamesDtoInput(String firstName, String lastName) {
-        return firstName == null || firstName.equals("")
-                || lastName == null || lastName.equals("");
-    }
 }

@@ -1,7 +1,7 @@
 package com.safetynetalerts.api.unittests.web;
 
 import com.safetynetalerts.api.domain.model.Person;
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.PersonService;
 import com.safetynetalerts.api.web.controller.FunctionalController;
 import lombok.var;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,7 +30,7 @@ public class FunctionalControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private SnaService snaService;
+    private PersonService personService;
 
     private static final Person p1 = new Person();
     private static final Person p2 = new Person();
@@ -68,9 +68,9 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnPopulatedFireStationDto_whenGetFireStationDtoOfPopulatedStation() throws Exception {
-        when(snaService.getPersonsByStation(anyInt())).thenReturn(personList);
-        when(snaService.getChildCounter(any())).thenReturn(Long.valueOf(1));
-        when(snaService.getAdultCounter(any())).thenReturn(Long.valueOf(1));
+        when(personService.getPersonsByStation(anyInt())).thenReturn(personList);
+        when(personService.getChildCounter(any())).thenReturn(Long.valueOf(1));
+        when(personService.getAdultCounter(any())).thenReturn(Long.valueOf(1));
 
         var expectedJson = "{\n" +
                 "\"fireStationPersons\": [\n" +
@@ -98,9 +98,9 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnEmptyFireStationDto_whenGetFireStationDtoOfEmptyStation() throws Exception {
-        when(snaService.getPersonsByStation(anyInt())).thenReturn(personEmptyList);
-        when(snaService.getChildCounter(any())).thenReturn(Long.valueOf(0));
-        when(snaService.getAdultCounter(any())).thenReturn(Long.valueOf(0));
+        when(personService.getPersonsByStation(anyInt())).thenReturn(personEmptyList);
+        when(personService.getChildCounter(any())).thenReturn(Long.valueOf(0));
+        when(personService.getAdultCounter(any())).thenReturn(Long.valueOf(0));
 
         var expectedJson = "{\n" +
                 "\"fireStationPersons\": [],\n" +
@@ -115,9 +115,9 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnPopulatedChildAlertDto_whenGetChildAlertDtoOfPopulatedAddress() throws Exception {
-        when(snaService.getPersonsByAddress(anyString())).thenReturn(personList);
-        when(snaService.getChildren(any())).thenReturn(Collections.singletonList(p1));
-        when(snaService.getAdults(any())).thenReturn(Collections.singletonList(p2));
+        when(personService.getPersonsByAddress(anyString())).thenReturn(personList);
+        when(personService.getChildren(any())).thenReturn(Collections.singletonList(p1));
+        when(personService.getAdults(any())).thenReturn(Collections.singletonList(p2));
 
         var expectedJson = "{\n" +
                 "\"alertedChildren\": [\n" +
@@ -143,9 +143,9 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnEmptyChildAlertDto_whenGetChildAlertDtoOfEmptyAddress() throws Exception {
-        when(snaService.getPersonsByAddress(anyString())).thenReturn(personEmptyList);
-        when(snaService.getChildren(any())).thenReturn(personEmptyList);
-        when(snaService.getAdults(any())).thenReturn(personEmptyList);
+        when(personService.getPersonsByAddress(anyString())).thenReturn(personEmptyList);
+        when(personService.getChildren(any())).thenReturn(personEmptyList);
+        when(personService.getAdults(any())).thenReturn(personEmptyList);
 
         var expectedJson = "{\n" +
                 "\"alertedChildren\": [],\n" +
@@ -159,7 +159,7 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnPopulatedPhoneAlertDto_whenGetPhoneAlertDtoOfPopulatedStation() throws Exception {
-        when(snaService.getPersonsByStation(anyInt())).thenReturn(personList);
+        when(personService.getPersonsByStation(anyInt())).thenReturn(personList);
 
         var expectedJson = "{\n" +
                 "\"phones\": [\n" +
@@ -174,7 +174,7 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnEmptyPhoneAlertDto_whenGetPhoneAlertDtoOfEmptyStation() throws Exception {
-        when(snaService.getPersonsByStation(anyInt())).thenReturn(personEmptyList);
+        when(personService.getPersonsByStation(anyInt())).thenReturn(personEmptyList);
 
         var expectedJson = "{\n" +
                 "\"phones\": []\n" +
@@ -187,8 +187,8 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnPopulatedFireDto_whenGetFireDtoOfPopulatedAddress() throws Exception {
-        when(snaService.getPersonsByAddress(anyString())).thenReturn(personList);
-        when(snaService.getFireStation(any())).thenReturn(1);
+        when(personService.getPersonsByAddress(anyString())).thenReturn(personList);
+        when(personService.getFireStation(any())).thenReturn(1);
 
         var expectedJson = "{\n" +
                 "\"firePersons\": [\n" +
@@ -230,8 +230,8 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnEmptyFireDto_whenGetFireDtoOfEmptyAddress() throws Exception {
-        when(snaService.getPersonsByAddress(anyString())).thenReturn(personEmptyList);
-        when(snaService.getFireStation(any())).thenReturn(0);
+        when(personService.getPersonsByAddress(anyString())).thenReturn(personEmptyList);
+        when(personService.getFireStation(any())).thenReturn(0);
 
         var expectedJson = "{\n" +
                 "\"firePersons\": [],\n" +
@@ -245,7 +245,7 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnPopulatedStationsDto_whenGetStationsDtoOfPopulatedStation() throws Exception {
-        when(snaService.getPersonsByStations(any())).thenReturn(personList);
+        when(personService.getPersonsByStations(any())).thenReturn(personList);
 
         var expectedJson = "{\n" +
                 "\"personsByAddress\": [\n" +
@@ -295,7 +295,7 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnEmptyStationsDto_whenGetStationsDtoOfEmptyStation() throws Exception {
-        when(snaService.getPersonsByStations(any())).thenReturn(personEmptyList);
+        when(personService.getPersonsByStations(any())).thenReturn(personEmptyList);
 
         var expectedJson = "{\n" +
                 "\"personsByAddress\": []\n" +
@@ -308,7 +308,7 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnPopulatedPersonInfoDto_whenGetPersonInfoDtoOfExistingPerson() throws Exception {
-        when(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(p1));
+        when(personService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(p1));
 
         var expectedJson = "{\n" +
                 "\"personsInfo\": [\n" +
@@ -345,7 +345,7 @@ public class FunctionalControllerTest {
         p3.setAge(30);
         p3.setEmail("p3@email.com");
 
-        when(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(Arrays.asList(p1, p3));
+        when(personService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(Arrays.asList(p1, p3));
 
         var expectedJson = "{\n" +
                 "\"personsInfo\": [\n" +
@@ -387,7 +387,7 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnEmptyPersonInfoDto_whenGetPersonInfoDtoOfNonExistingPerson() throws Exception {
-        when(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(personEmptyList);
+        when(personService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(personEmptyList);
 
         var expectedJson = "{\n" +
                 "\"personsInfo\": []\n" +
@@ -400,7 +400,7 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnPopulatedCommunityEmailDto_whenGetCommunityEmailDtoOfPopulatedCity() throws Exception {
-        when(snaService.getPersonsByCity(anyString())).thenReturn(personList);
+        when(personService.getPersonsByCity(anyString())).thenReturn(personList);
 
         var expectedJson = "{\n" +
                 "\"emails\": [\n" +
@@ -416,7 +416,7 @@ public class FunctionalControllerTest {
 
     @Test
     public void should_returnEmptyCommunityEmailDto_whenGetCommunityEmailDtoOfEmptyCity() throws Exception {
-        when(snaService.getPersonsByCity(anyString())).thenReturn(personEmptyList);
+        when(personService.getPersonsByCity(anyString())).thenReturn(personEmptyList);
 
         var expectedJson = "{\n" +
                 "\"emails\": []\n" +

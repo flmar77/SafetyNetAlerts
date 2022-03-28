@@ -1,6 +1,7 @@
 package com.safetynetalerts.api.unittests.input;
 
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.FireStationService;
+import com.safetynetalerts.api.domain.service.PersonService;
 import com.safetynetalerts.api.input.service.InputService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,17 +23,20 @@ public class InputServiceTest {
     private InputService inputService;
 
     @Mock
-    private SnaService snaService;
+    private PersonService personService;
+
+    @Mock
+    private FireStationService fireStationService;
 
     @Test
     public void should_feedEntities() throws IOException {
         inputService.loadInMemoryDbFromInput();
 
-        verify(snaService, times(1)).saveAllFireStationEntities(argThat(fireStationEntities -> {
+        verify(fireStationService, times(1)).saveAllFireStationEntities(argThat(fireStationEntities -> {
             assertThat(fireStationEntities.size()).isEqualTo(4);
             return true;
         }));
-        verify(snaService, times(1)).saveAllPersonEntities(argThat(personEntities -> {
+        verify(personService, times(1)).saveAllPersonEntities(argThat(personEntities -> {
             assertThat(personEntities.size()).isEqualTo(23);
             return true;
         }));

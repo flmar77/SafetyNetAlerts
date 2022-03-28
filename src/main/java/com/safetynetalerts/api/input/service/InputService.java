@@ -4,7 +4,8 @@ import com.google.gson.Gson;
 import com.googlecode.jmapper.JMapper;
 import com.safetynetalerts.api.dao.entity.FireStationEntity;
 import com.safetynetalerts.api.dao.entity.PersonEntity;
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.FireStationService;
+import com.safetynetalerts.api.domain.service.PersonService;
 import com.safetynetalerts.api.input.model.AggregatedInputModel;
 import com.safetynetalerts.api.input.model.FireStationInputModel;
 import com.safetynetalerts.api.input.model.MedicalRecordInputModel;
@@ -26,7 +27,10 @@ import java.util.stream.Collectors;
 public class InputService {
 
     @Autowired
-    private SnaService snaService;
+    private PersonService personService;
+
+    @Autowired
+    private FireStationService fireStationService;
 
     private List<PersonEntity> personEntities;
     private List<FireStationEntity> fireStationEntities;
@@ -43,12 +47,12 @@ public class InputService {
         AggregatedInputModel aggregatedInputModel = new Gson().fromJson(inputStreamReader, AggregatedInputModel.class);
 
         extractFireStation(aggregatedInputModel.getFireStationInputModels());
-        snaService.saveAllFireStationEntities(fireStationEntities);
+        fireStationService.saveAllFireStationEntities(fireStationEntities);
 
         extractPersonEntityFromPersonInputModel(aggregatedInputModel.getPersonInputModels());
         enrichPersonEntityFromMedicalRecordInputModel(aggregatedInputModel.getMedicalRecordInputModels());
         enrichPersonEntityFromFireStationEntity(fireStationEntities);
-        snaService.saveAllPersonEntities(personEntities);
+        personService.saveAllPersonEntities(personEntities);
 
     }
 

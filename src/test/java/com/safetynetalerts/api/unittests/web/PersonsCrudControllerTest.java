@@ -1,7 +1,7 @@
 package com.safetynetalerts.api.unittests.web;
 
 import com.safetynetalerts.api.domain.model.Person;
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.PersonService;
 import com.safetynetalerts.api.web.controller.PersonsCrudController;
 import lombok.var;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.persistence.EntityExistsException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,7 +34,7 @@ public class PersonsCrudControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private SnaService snaService;
+    private PersonService personService;
 
     private static final Person p1 = new Person();
     private static final Person p2 = new Person();
@@ -71,7 +72,7 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnPopulatedPersonsDto_whenGetPersons() throws Exception {
-        when(snaService.getAllPersons()).thenReturn(personList);
+        when(personService.getAllPersons()).thenReturn(personList);
 
         var expectedJson = "[\n" +
                 "{\n" +
@@ -103,7 +104,7 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnPopulatedPersonDto_whenGetPersonsByFirstNameAndLastName() throws Exception {
-        when(snaService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(p1));
+        when(personService.getPersonsByFirstNameAndLastName(anyString(), anyString())).thenReturn(Collections.singletonList(p1));
 
         var expectedJson = "[\n" +
                 "{\n" +
@@ -125,8 +126,7 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnPopulatedPersonDto_whenPostNewPersonDto() throws Exception {
-        when(snaService.personAlreadyExists(anyString(), anyString())).thenReturn(false);
-        when(snaService.createPerson(any())).thenReturn(p1);
+        when(personService.createPerson(any())).thenReturn(p1);
 
         var inputJson = "{\n" +
                 "\"firstName\": \"p1FirstName\",\n" +
@@ -168,8 +168,8 @@ public class PersonsCrudControllerTest {
     }
 
     @Test
-    public void should_returnUnprocessableEntity_whenPostExistingPersonDto() throws Exception {
-        when(snaService.personAlreadyExists(anyString(), anyString())).thenReturn(true);
+    public void should_returnUnprocessableEntity_whenPostExistingPerson() throws Exception {
+        when(personService.createPerson(any())).thenThrow(EntityExistsException.class);
 
         var inputJson = "{\n" +
                 "\"firstName\": \"p1FirstName\",\n" +
@@ -191,7 +191,7 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnPopulatedPersonDto_whenPutExistingPersonDto() throws Exception {
-        when(snaService.updatePersonWithoutMedicalRecords(anyString(), anyString(), any())).thenReturn(p1);
+        when(personService.updatePersonWithoutMedicalRecords(anyString(), anyString(), any())).thenReturn(p1);
 
         var inputJson = "{\n" +
                 "\"firstName\": \"p1FirstName\",\n" +
@@ -204,7 +204,7 @@ public class PersonsCrudControllerTest {
                 "\"birthdate\": \"2002-01-01\"\n" +
                 "}\n";
 
-        mockMvc.perform(put("/persons/x&y")
+        mockMvc.perform(put("/persons/p1FirstName&p1LastName")
                         .content(inputJson)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -234,9 +234,10 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnNotFound_whenPutNewPersonDto() throws Exception {
-        when(snaService.updatePersonWithoutMedicalRecords(anyString(), anyString(), any())).thenThrow(NoSuchElementException.class);
+        when(personService.updatePersonWithoutMedicalRecords(anyString(), anyString(), any())).thenThrow(NoSuchElementException.class);
 
         var inputJson = "{\n" +
+                "\"firstName\": \"p1FirstName\",\n" +
                 "\"lastName\": \"p1LastName\",\n" +
                 "\"address\": \"p1Address\",\n" +
                 "\"city\": \"p1City\",\n" +
@@ -246,7 +247,7 @@ public class PersonsCrudControllerTest {
                 "\"birthdate\": \"2002-01-01\"\n" +
                 "}\n";
 
-        mockMvc.perform(put("/persons/x&y")
+        mockMvc.perform(put("/persons/p1FirstName&p1LastName")
                         .content(inputJson)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -267,7 +268,7 @@ public class PersonsCrudControllerTest {
 
     @Test
     public void should_returnNotFound_whenDeleteNewPerson() throws Exception {
-        doThrow(new NoSuchElementException()).when(snaService).deletePerson(anyString(), anyString());
+        doThrow(new NoSuchElementException()).when(personService).deletePerson(anyString(), anyString());
 
         mockMvc.perform(delete("/persons/x&y"))
                 .andExpect(status().isNotFound());

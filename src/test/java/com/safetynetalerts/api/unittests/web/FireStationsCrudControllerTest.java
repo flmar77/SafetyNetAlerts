@@ -1,7 +1,7 @@
 package com.safetynetalerts.api.unittests.web;
 
 import com.safetynetalerts.api.domain.model.FireStation;
-import com.safetynetalerts.api.domain.service.SnaService;
+import com.safetynetalerts.api.domain.service.FireStationService;
 import com.safetynetalerts.api.web.controller.FireStationsCrudController;
 import com.safetynetalerts.api.web.dto.FireStationsDto;
 import lombok.var;
@@ -33,7 +33,7 @@ public class FireStationsCrudControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private SnaService snaService;
+    private FireStationService fireStationService;
 
     private static FireStation fs1;
     private static FireStation fs2;
@@ -52,7 +52,7 @@ public class FireStationsCrudControllerTest {
 
     @Test
     public void should_returnPopulatedFireStationsDto_whenGetAllFireStationsDto() throws Exception {
-        when(snaService.getAllFireStations()).thenReturn(fireStationList);
+        when(fireStationService.getAllFireStations()).thenReturn(fireStationList);
 
         var expectedJson = "[\n" +
                 "{\n" +
@@ -82,7 +82,7 @@ public class FireStationsCrudControllerTest {
 
     @Test
     public void should_returnPopulatedFireStationDto_whenGetFireStationsDto() throws Exception {
-        when(snaService.getFireStationByStationAndAddress(anyInt(), anyString())).thenReturn(fs2);
+        when(fireStationService.getFireStationByStationAndAddress(anyInt(), anyString())).thenReturn(fs2);
 
         var expectedJson = "{\n" +
                 "\"station\": 2,\n" +
@@ -96,7 +96,7 @@ public class FireStationsCrudControllerTest {
 
     @Test
     public void should_returnNotFound_whenGetEmptyFireStationsDto() throws Exception {
-        doThrow(new NoSuchElementException()).when(snaService).getFireStationByStationAndAddress(anyInt(), anyString());
+        doThrow(new NoSuchElementException()).when(fireStationService).getFireStationByStationAndAddress(anyInt(), anyString());
 
         mockMvc.perform(get("/firestations/2&adr3"))
                 .andExpect(status().isNotFound());
@@ -135,7 +135,7 @@ public class FireStationsCrudControllerTest {
 
     @Test
     public void should_returnUnprocessableEntity_whenPostExistingFireStationsDto() throws Exception {
-        doThrow(new EntityExistsException()).when(snaService).createFireStationMapping(any(FireStationsDto.class));
+        doThrow(new EntityExistsException()).when(fireStationService).createFireStationMapping(any(FireStationsDto.class));
 
         var inputJson = "{\n" +
                 "\"station\": 2,\n" +
@@ -181,7 +181,7 @@ public class FireStationsCrudControllerTest {
 
     @Test
     public void should_returnUnprocessableEntity_whenPutExistingFireStationsDto() throws Exception {
-        doThrow(new EntityExistsException()).when(snaService).updateFireStationMapping(any(FireStationsDto.class));
+        doThrow(new EntityExistsException()).when(fireStationService).updateFireStationMapping(any(FireStationsDto.class));
 
         var inputJson = "{\n" +
                 "\"station\": 2,\n" +
@@ -197,7 +197,7 @@ public class FireStationsCrudControllerTest {
 
     @Test
     public void should_returnNotFound_whenPutFireStationsDtoOfNewAddress() throws Exception {
-        doThrow(new NoSuchElementException()).when(snaService).updateFireStationMapping(any(FireStationsDto.class));
+        doThrow(new NoSuchElementException()).when(fireStationService).updateFireStationMapping(any(FireStationsDto.class));
 
         var inputJson = "{\n" +
                 "\"station\": 2,\n" +
@@ -225,7 +225,7 @@ public class FireStationsCrudControllerTest {
 
     @Test
     public void should_returnNotFound_whenDeleteNewFireStationsDto() throws Exception {
-        doThrow(new NoSuchElementException()).when(snaService).deleteFireStationMapping(anyInt(), anyString());
+        doThrow(new NoSuchElementException()).when(fireStationService).deleteFireStationMapping(anyInt(), anyString());
 
         mockMvc.perform(delete("/firestations/2&adr3"))
                 .andExpect(status().isNotFound());
