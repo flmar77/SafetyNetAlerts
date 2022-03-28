@@ -138,20 +138,19 @@ public class PersonService {
         personRepo.saveAll(personEntities);
     }
 
-    public void saveAllPersons(List<Person> persons) {
-        JMapper<PersonEntity, Person> personToEntityMapper = new JMapper<>(PersonEntity.class, Person.class);
-        List<PersonEntity> personEntities = persons.stream()
-                .map(personToEntityMapper::getDestination)
-                .collect(Collectors.toList());
-        saveAllPersonEntities(personEntities);
-    }
-
     public int getFireStation(List<Person> persons) {
         if (persons.size() > 0) {
             return persons.get(0).getFireStation();
         } else {
             return 0;
         }
+    }
+
+    public void setNewFireStationOnPersonsByAddress(int station, String address) {
+        List<PersonEntity> personsByAddress = personRepo.findAllByAddress(address);
+        saveAllPersonEntities(personsByAddress.stream()
+                .peek(it -> it.setFireStation(station))
+                .collect(Collectors.toList()));
     }
 
     private List<Person> mapPersonsEntityToPersons(List<PersonEntity> personsEntity) {

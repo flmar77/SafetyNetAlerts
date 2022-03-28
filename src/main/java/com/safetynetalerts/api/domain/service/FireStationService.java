@@ -3,7 +3,6 @@ package com.safetynetalerts.api.domain.service;
 import com.safetynetalerts.api.dao.entity.FireStationEntity;
 import com.safetynetalerts.api.dao.repository.FireStationRepo;
 import com.safetynetalerts.api.domain.model.FireStation;
-import com.safetynetalerts.api.domain.model.Person;
 import com.safetynetalerts.api.web.dto.FireStationsDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -96,10 +95,7 @@ public class FireStationService {
             createFireStationMapping(fireStationsDto);
 
             // and fireStation's persons have also to be updated
-            List<Person> personsByAddress = personService.getPersonsByAddress(fireStationsDto.getAddress());
-            personService.saveAllPersons(personsByAddress.stream()
-                    .peek(it -> it.setFireStation(fireStationsDto.getStation()))
-                    .collect(Collectors.toList()));
+            personService.setNewFireStationOnPersonsByAddress(fireStationsDto.getStation(), fireStationsDto.getAddress());
         }
     }
 
@@ -122,10 +118,7 @@ public class FireStationService {
             fireStationRepo.save(fireStationEntity);
 
             // and fireStation's persons has to be initialized
-            List<Person> personsByAddress = personService.getPersonsByAddress(address);
-            personService.saveAllPersons(personsByAddress.stream()
-                    .peek(it -> it.setFireStation(0))
-                    .collect(Collectors.toList()));
+            personService.setNewFireStationOnPersonsByAddress(0, address);
         }
     }
 

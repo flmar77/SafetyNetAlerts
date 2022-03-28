@@ -282,8 +282,10 @@ public class PersonServiceTest {
     }
 
     @Test
-    public void should_SaveAll_whenSaveAllPersons() {
-        personService.saveAllPersons(anyList());
+    public void should_SaveAll_whenSetNewFireStation() {
+        when(personRepo.findAllByAddress(anyString())).thenReturn(personEntityList);
+
+        personService.setNewFireStationOnPersonsByAddress(1, anyString());
 
         verify(personRepo, times(1)).saveAll(anyList());
     }

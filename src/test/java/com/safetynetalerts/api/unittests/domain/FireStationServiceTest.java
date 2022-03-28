@@ -145,7 +145,6 @@ public class FireStationServiceTest {
         fsUpdate.setStation(3);
         fsUpdate.setAddresses(Arrays.asList("adr5", "adr6"));
         when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.of(fsUpdate));
-        when(personService.getPersonsByAddress(anyString())).thenReturn(anyList());
 
         FireStationsDto fireStationsDto = new FireStationsDto();
         fireStationsDto.setStation(4);
@@ -173,7 +172,6 @@ public class FireStationServiceTest {
         fsDelete.setStation(5);
         fsDelete.setAddresses(Arrays.asList("adr7", "adr8"));
         when(fireStationRepo.findByAddresses(anyString())).thenReturn(Optional.of(fsDelete));
-        when(personService.getPersonsByAddress(anyString())).thenReturn(anyList());
 
         fireStationService.deleteFireStationMapping(5, "adr7");
 
