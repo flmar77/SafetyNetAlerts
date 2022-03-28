@@ -35,20 +35,17 @@ public class FireStationService {
 
     public FireStation getFireStationByStationAndAddress(int station, String address) {
 
-        FireStation fireStation = new FireStation();
-
         FireStationEntity fireStationEntity = fireStationRepo.findByStation(station)
                 .orElseThrow(NoSuchElementException::new);
 
-        if (fireStationEntity.getAddresses().stream().anyMatch(addressEntity -> addressEntity.equals(address))) {
-            fireStation.setStation(station);
-            fireStation.setAddresses(Collections.singletonList(address));
-        } else {
+        if (fireStationEntity.getAddresses().stream().noneMatch(addressEntity -> addressEntity.equals(address))) {
             throw new NoSuchElementException();
         }
 
+        FireStation fireStation = new FireStation();
+        fireStation.setStation(station);
+        fireStation.setAddresses(Collections.singletonList(address));
         return fireStation;
-
     }
 
     public void createFireStationMapping(FireStationsDto fireStationsDto) {
@@ -81,77 +78,58 @@ public class FireStationService {
 
     public void updateFireStationMapping(FireStationsDto fireStationsDto) {
 
-        Optional<FireStationEntity> optionalFireStationEntity = fireStationRepo.findByAddresses(fireStationsDto.getAddress());
+        FireStationEntity fireStationEntity = fireStationRepo.findByAddresses(fireStationsDto.getAddress())
+                .orElseThrow(NoSuchElementException::new);
 
-        if (optionalFireStationEntity.isPresent()) {
-            // address exists
-
-            FireStationEntity fireStationEntity = optionalFireStationEntity.get();
-
-            if (fireStationEntity.getStation() == (fireStationsDto.getStation())) {
-                // address exists and is already assigned to this station
-                throw new EntityExistsException();
-            } else {
-                // address exists so ...
-                // address has to be deleted from the actual fireStation
-                fireStationEntity.setAddresses(fireStationEntity.getAddresses().stream()
-                        .filter(it -> !it.equals(fireStationsDto.getAddress()))
-                        .collect(Collectors.toList()));
-                fireStationRepo.save(fireStationEntity);
-
-                // and has to be assigned to the new one (almost same as create)
-                createFireStationMapping(fireStationsDto);
-
-                // fireStation's persons have also to be updated
-                List<Person> personsByAddress = personService.getPersonsByAddress(fireStationsDto.getAddress());
-                personService.saveAllPersons(personsByAddress.stream()
-                        .peek(it -> it.setFireStation(fireStationsDto.getStation()))
-                        .collect(Collectors.toList()));
-            }
+        if (fireStationEntity.getStation() == (fireStationsDto.getStation())) {
+            // address exists and is already assigned to this station
+            throw new EntityExistsException();
         } else {
-            // address doesn't exist
-            throw new NoSuchElementException();
+            // address exists so ...
+            // address has to be deleted from the actual fireStation
+            fireStationEntity.setAddresses(fireStationEntity.getAddresses().stream()
+                    .filter(it -> !it.equals(fireStationsDto.getAddress()))
+                    .collect(Collectors.toList()));
+            fireStationRepo.save(fireStationEntity);
+
+            // and has to be assigned to the new one (almost same as create)
+            createFireStationMapping(fireStationsDto);
+
+            // and fireStation's persons have also to be updated
+            List<Person> personsByAddress = personService.getPersonsByAddress(fireStationsDto.getAddress());
+            personService.saveAllPersons(personsByAddress.stream()
+                    .peek(it -> it.setFireStation(fireStationsDto.getStation()))
+                    .collect(Collectors.toList()));
         }
     }
 
     public void deleteFireStationMapping(int station, String address) {
 
-        Optional<FireStationEntity> optionalFireStationEntity = fireStationRepo.findByAddresses(address);
+        FireStationEntity fireStationEntity = fireStationRepo.findByAddresses(address)
+                .orElseThrow(NoSuchElementException::new);
 
-        if (optionalFireStationEntity.isPresent()) {
-            // address exists
-
-            FireStationEntity fireStationEntity = optionalFireStationEntity.get();
-
-            if (fireStationEntity.getStation() == (station)) {
-                // address exists and is assigned to this station so...
-                // address has to be deleted from this station
-                List<String> newAddresses = fireStationEntity.getAddresses().stream()
-                        .filter(it -> !it.equals(address))
-                        .collect(Collectors.toList());
-                fireStationEntity.setAddresses(newAddresses);
-                fireStationRepo.save(fireStationEntity);
-
-                // and fireStation's persons has to be initialized
-                List<Person> personsByAddress = personService.getPersonsByAddress(address);
-                personService.saveAllPersons(personsByAddress.stream()
-                        .peek(it -> it.setFireStation(0))
-                        .collect(Collectors.toList()));
-
-            } else {
-                // address exists but is not assigned to this station
-                throw new NoSuchElementException();
-            }
+        if (fireStationEntity.getStation() != (station)) {
+            // address exists but is not assigned to this station
+            throw new NoSuchElementException();
 
         } else {
-            //address doesn't exist
-            throw new NoSuchElementException();
+            // address exists and is assigned to this station so...
+            // address has to be deleted from this station
+            List<String> newAddresses = fireStationEntity.getAddresses().stream()
+                    .filter(it -> !it.equals(address))
+                    .collect(Collectors.toList());
+            fireStationEntity.setAddresses(newAddresses);
+            fireStationRepo.save(fireStationEntity);
+
+            // and fireStation's persons has to be initialized
+            List<Person> personsByAddress = personService.getPersonsByAddress(address);
+            personService.saveAllPersons(personsByAddress.stream()
+                    .peek(it -> it.setFireStation(0))
+                    .collect(Collectors.toList()));
         }
     }
 
     public void saveAllFireStationEntities(List<FireStationEntity> fireStationEntities) {
         fireStationRepo.saveAll(fireStationEntities);
     }
-
-
 }
